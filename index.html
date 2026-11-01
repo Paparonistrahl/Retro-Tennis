@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="de"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#080d0b"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Paparoni Tennis">
+<link rel="manifest" href="manifest.webmanifest"><title>Paparoni – Retro Tennis</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100dvh;background:#101713;color:#e6f3e8;font-family:system-ui;display:flex;justify-content:center;padding:env(safe-area-inset-top) 12px env(safe-area-inset-bottom)}
+.app{width:min(100%,520px);display:flex;flex-direction:column;gap:10px;margin:auto}.top{display:flex;justify-content:space-between;font:700 12px monospace;letter-spacing:2px}.scores{display:flex;gap:8px}.scores div{flex:1;background:#18231c;border:1px solid #344b39;border-radius:9px;text-align:center;padding:7px}.scores small{display:block;color:#a6c2aa;font:11px monospace}.scores b{font:bold 27px monospace}.court{position:relative;background:#080d0b;border:2px solid #52705a;border-radius:9px;overflow:hidden}canvas{width:100%;height:auto;display:block;aspect-ratio:4/3;touch-action:none}.overlay{position:absolute;inset:0;background:#080d0bee;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:12px}.overlay h1{font-size:clamp(24px,7vw,36px);margin:0;color:#d8f5dc}.overlay p{font:12px monospace;color:#a6c9ad}.btn{border:1px solid #64836c;border-radius:9px;padding:12px 20px;font-weight:850;touch-action:manipulation;background:#172b20;color:#d8f5dc}.primary{background:#c9f5d0;color:#102316}.controls{display:flex;flex-direction:column;gap:7px}.control{height:54px;font-size:25px}.actions{display:flex;gap:8px}.actions button{flex:1}.msg{text-align:center;font:12px monospace;color:#83c995;min-height:18px}.hint{text-align:center;font-size:11px;color:#91a697}.flash{position:fixed;inset:0;pointer-events:none;background:white;opacity:0;z-index:20}.flash.go{animation:fl .45s ease-out}@keyframes fl{0%{opacity:.9}35%{opacity:.08}60%{opacity:.65}100%{opacity:0}}
+.celebrate{position:absolute;inset:0;display:none;background:#050805;z-index:5}.celebrate img{width:100%;height:100%;object-fit:contain}
+</style></head><body><div class="flash" id="flash"></div><main class="app">
+<div class="top"><span>◈ PAPARONI</span><span id="status">BEREIT</span></div>
+<div class="scores"><div><small>PAPARONI</small><b id="s0">0</b></div><div><small>CHATGPT</small><b id="s1">0</b></div></div>
+<div class="court"><canvas id="c" width="800" height="600"></canvas>
+<div class="overlay" id="ov"><h1 id="ttl">RETRO TENNIS</h1><p id="sub">PAPARONI GEGEN CHATGPT · BIS 5 PUNKTE</p><button class="btn primary" id="start">▶ START</button></div>
+<div class="celebrate" id="celebrate"><img src="celebration.png" alt="Pixel-Art-Jubelbild"></div></div>
+<div class="hint">STEUERUNG PAPARONI</div><div class="controls"><button class="btn control" id="up" aria-label="Hoch">▲</button><button class="btn control" id="dn" aria-label="Runter">▼</button></div>
+<div class="actions"><button class="btn" id="pause">Ⅱ PAUSE</button><button class="btn" id="reset">↻ NEU</button></div>
+<div class="msg" id="msg">Tippe START – die Arcade-Musik beginnt!</div><div class="hint">PING BEIM TREFFER · YEAH + BLITZ BEI PUNKTVERLUST</div>
+</main>
+<script>
+(()=>{const $=id=>document.getElementById(id),c=$('c'),g=c.getContext('2d'),W=800,H=600,P=112;let py=244,ai=244,b={x:400,y:300,vx:0,vy:0},s=[0,0],state='ready',server=0,raf=0,keys={},ac=null,musicTimer=null,musicMode=0,note=0;
+function audio(){if(!ac){let A=window.AudioContext||window.webkitAudioContext;if(A)ac=new A()}if(ac&&ac.state==='suspended')ac.resume()}
+const tunes=[[659,784,988,784,523,659,784,523,587,698,880,698,440,587,698,587],[523,659,784,1047,784,659,587,698,880,1175,880,698,494,587,740,587]];
+function tone(freq,dur=.14){if(!ac)return;let t=ac.currentTime,o=ac.createOscillator(),v=ac.createGain();o.type=musicMode?'square':'triangle';o.frequency.setValueAtTime(freq,t);v.gain.setValueAtTime(.0001,t);v.gain.linearRampToValueAtTime(.045,t+.012);v.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(v);v.connect(ac.destination);o.start(t);o.stop(t+dur+.01)}
+function musicStart(){audio();if(!ac||musicTimer)return;note=0;musicTimer=setInterval(()=>{if(state!=='play')return;if(note%16===0&&note>0)musicMode=1-musicMode;let seq=tunes[musicMode];tone(seq[note%seq.length]);note++},170)}
+function musicStop(){if(musicTimer){clearInterval(musicTimer);musicTimer=null}}
+function ping(){audio();if(!ac)return;let t=ac.currentTime,o=ac.createOscillator(),v=ac.createGain();o.type='sine';o.frequency.setValueAtTime(1150,t);o.frequency.exponentialRampToValueAtTime(620,t+.085);v.gain.setValueAtTime(.001,t);v.gain.linearRampToValueAtTime(.19,t+.008);v.gain.exponentialRampToValueAtTime(.001,t+.19);o.connect(v);v.connect(ac.destination);o.start(t);o.stop(t+.2)}
+function yeah(){try{if('speechSynthesis'in window){speechSynthesis.cancel();let u=new SpeechSynthesisUtterance('Yeah!');u.lang='en-US';u.pitch=1.25;u.rate=.9;speechSynthesis.speak(u)}}catch(e){}}
+function flash(){let f=$('flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go')}
+function draw(){g.fillStyle='#080d0b';g.fillRect(0,0,W,H);g.fillStyle='#365440';for(let y=12;y<H;y+=28)g.fillRect(397,y,6,14);g.fillStyle='#d8f5dc';g.fillRect(25,py,13,P);g.fillRect(762,ai,13,P);g.fillStyle='white';g.shadowColor='white';g.shadowBlur=14;g.beginPath();g.arc(b.x,b.y,9,0,7);g.fill();g.shadowBlur=0}
+function overlay(t,sub,btn='▶ START'){ $('ttl').textContent=t;$('sub').textContent=sub;$('start').textContent=btn;$('ov').style.display='flex'}
+function update(){ $('s0').textContent=s[0];$('s1').textContent=s[1]}
+function begin(){audio();$('celebrate').style.display='none';$('ov').style.display='none';if(state==='over'){s=[0,0];update()}b={x:server===0?95:705,y:server===0?py+P/2:ai+P/2,vx:server===0?5.2:-5.2,vy:(Math.random()-.5)*3};state='play';$('status').textContent='SPIEL LÄUFT';$('msg').textContent='Arcade-Modus aktiv!';musicStart();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop)}
+function point(w){s[w]++;update();server=w;b={x:w===0?95:705,y:300,vx:0,vy:0};flash();yeah();musicStop();if(s[w]>=5){state='over';$('status').textContent='MATCH ENDE';$('msg').textContent=(w===0?'Paparoni gewinnt!':'ChatGPT gewinnt!')+' Endstand '+s.join(' : ');$('celebrate').style.display='block';setTimeout(()=>$('celebrate').style.display='none',2000);overlay(w===0?'PAPARONI GEWINNT!':'CHATGPT GEWINNT!','ENDSTAND '+s.join(' : '),'↻ NOCHMAL');return}
+state='intermission';$('status').textContent='PUNKT';$('msg').textContent=(w===0?'Paparoni':'ChatGPT')+' holt den Punkt!';$('celebrate').style.display='block';setTimeout(()=>{$('celebrate').style.display='none';if(state==='intermission'){state='serve';begin()}},2000)}
+function step(){if(state!=='play')return;if(keys.u)py-=8;if(keys.d)py+=8;py=Math.max(0,Math.min(H-P,py));let target=b.vx>0?b.y+Math.max(-65,Math.min(65,b.vy*5)):300+Math.sin(Date.now()/900)*15;ai+=Math.max(-4.5,Math.min(4.5,target-(ai+P/2)));ai=Math.max(0,Math.min(H-P,ai));b.x+=b.vx;b.y+=b.vy;if(b.y<10||b.y>590){b.vy*=-1;b.y=Math.max(10,Math.min(590,b.y))}
+if(b.vx<0&&b.x<=49&&b.y>=py-9&&b.y<=py+P+9){b.vx=Math.min(13,Math.abs(b.vx)*1.09);b.vy=(b.y-py-P/2)/(P/2)*7.2;b.x=50;ping()}
+if(b.vx>0&&b.x>=751&&b.y>=ai-9&&b.y<=ai+P+9){b.vx=-Math.min(13,Math.abs(b.vx)*1.09);b.vy=(b.y-ai-P/2)/(P/2)*7.2;b.x=750;ping()}
+if(b.x<0){point(1);return}if(b.x>800){point(0);return}draw()}
+function loop(){step();if(state==='play')raf=requestAnimationFrame(loop)}
+function pause(){if(state==='play'){state='paused';musicStop();cancelAnimationFrame(raf);overlay('PAUSE','Spiel pausiert.','▶ WEITER')}else if(state==='paused'){state='play';$('ov').style.display='none';musicStart();raf=requestAnimationFrame(loop)}}
+function reset(){cancelAnimationFrame(raf);musicStop();s=[0,0];py=ai=244;server=0;state='ready';b={x:400,y:300,vx:0,vy:0};update();$('status').textContent='BEREIT';$('msg').textContent='Tippe START – die Arcade-Musik beginnt!';$('celebrate').style.display='none';overlay('RETRO TENNIS','PAPARONI GEGEN CHATGPT · BIS 5 PUNKTE');draw()}
+$('start').onclick=()=>state==='paused'?pause():begin();$('pause').onclick=pause;$('reset').onclick=reset;
+addEventListener('keydown',e=>{if(e.key==='ArrowUp'||e.key==='ArrowDown')e.preventDefault();if(e.key==='ArrowUp'||e.key==='w')keys.u=true;if(e.key==='ArrowDown'||e.key==='s')keys.d=true});addEventListener('keyup',e=>{if(e.key==='ArrowUp'||e.key==='w')keys.u=false;if(e.key==='ArrowDown'||e.key==='s')keys.d=false});
+function hold(id,d){let timer;const move=()=>{if(state==='play')py=Math.max(0,Math.min(H-P,py+d*11))};$(id).addEventListener('pointerdown',e=>{e.preventDefault();audio();$(id).setPointerCapture(e.pointerId);move();timer=setInterval(move,30)});['pointerup','pointercancel','lostpointercapture'].forEach(ev=>$(id).addEventListener(ev,()=>clearInterval(timer)))}
+hold('up',-1);hold('dn',1);draw();if('serviceWorker'in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('./sw.js').catch(()=>{});
+})();
+</script></body></html>

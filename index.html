@@ -46,7 +46,25 @@ function pause(){if(state==='play'){state='paused';musicStop();cancelAnimationFr
 function reset(){cancelAnimationFrame(raf);musicStop();s=[0,0];py=ai=244;server=0;state='ready';b={x:400,y:300,vx:0,vy:0};update();$('status').textContent='BEREIT';$('msg').textContent='Tippe START – die Arcade-Musik beginnt!';$('celebrate').style.display='none';overlay('RETRO TENNIS','DU GEGEN CHATGPT · BIS 5 PUNKTE');draw()}
 $('start').onclick=()=>state==='paused'?pause():begin();$('pause').onclick=pause;$('reset').onclick=reset;
 addEventListener('keydown',e=>{if(e.key==='ArrowUp'||e.key==='ArrowDown')e.preventDefault();if(e.key==='ArrowUp'||e.key==='w')keys.u=true;if(e.key==='ArrowDown'||e.key==='s')keys.d=true});addEventListener('keyup',e=>{if(e.key==='ArrowUp'||e.key==='w')keys.u=false;if(e.key==='ArrowDown'||e.key==='s')keys.d=false});
-let activeControl=null,activeTimer=null;function hold(id,d){const el=$(id);const move=()=>{if(state==='play')py=Math.max(0,Math.min(H-P,py+d*11))};const release=()=>{if(activeControl!==el)return;clearInterval(activeTimer);activeTimer=null;activeControl=null;el.classList.remove('active')};el.addEventListener('pointerdown',e=>{e.preventDefault();audio();if(activeControl){clearInterval(activeTimer);activeControl.classList.remove('active')}activeControl=el;el.setPointerCapture(e.pointerId);el.classList.add('active');move();activeTimer=setInterval(move,30)});['pointerup','pointercancel','lostpointercapture'].forEach(ev=>el.addEventListener(ev,release))}
+let activeControl=null,activeTimer=null,activePointerId=null;
+function clearActiveControl(){if(activeTimer!==null)clearInterval(activeTimer);activeTimer=null;if(activeControl)activeControl.classList.remove('active');activeControl=null;activePointerId=null}
+function hold(id,d){
+ const el=$(id);
+ const move=()=>{if(state==='play')py=Math.max(0,Math.min(H-P,py+d*11))};
+ el.addEventListener('pointerdown',e=>{
+  e.preventDefault();audio();
+  clearActiveControl();
+  activeControl=el;activePointerId=e.pointerId;
+  el.classList.add('active');
+  try{el.setPointerCapture(e.pointerId)}catch(_){}
+  move();activeTimer=setInterval(move,30);
+ });
+ el.addEventListener('lostpointercapture',e=>{if(e.pointerId===activePointerId)clearActiveControl()});
+}
+addEventListener('pointerup',e=>{if(e.pointerId===activePointerId)clearActiveControl()});
+addEventListener('pointercancel',e=>{if(e.pointerId===activePointerId)clearActiveControl()});
+addEventListener('blur',clearActiveControl);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)clearActiveControl()});
 hold('up',-1);hold('dn',1);draw();if('serviceWorker'in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('./sw.js').catch(()=>{});
 })();
 </script></body></html>

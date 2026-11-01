@@ -46,10 +46,11 @@
  body{padding:2px max(4px,env(safe-area-inset-left)) 2px max(4px,env(safe-area-inset-right))}
  .app{height:calc(100dvh - 4px);grid-template-columns:minmax(82px,10vw) minmax(0,1fr) minmax(82px,10vw);gap:3px}
  .court{width:min(100%,calc((100dvh - 12px)*1.333))}
- .utility{top:20vh;width:34px;height:32px}
- #pause{left:auto;right:4px}
- #mute{left:auto;right:43px}
- #reset{right:auto;left:calc(100% - max(82px,10vw) + 4px)}
+ .utility{top:16vh;width:34px;height:32px}
+ /* Funktionstasten in den freien Zwischenraum neben dem Spielfeld setzen */
+ #pause{left:calc(50% - min(50%,(100dvh - 12px)*.6667) - 76px);right:auto}
+ #mute{left:calc(50% - min(50%,(100dvh - 12px)*.6667) - 36px);right:auto}
+ #reset{right:calc(50% - min(50%,(100dvh - 12px)*.6667) - 76px);left:auto}
  .control{height:clamp(82px,22dvh,126px);width:clamp(68px,8vw,92px);flex-basis:clamp(68px,8vw,92px);font-size:clamp(38px,8vh,54px)}
  .top span:last-child{top:auto;bottom:18vh;right:0;width:10vw;max-width:130px;font-size:clamp(8px,1.3vh,10px);text-align:center;letter-spacing:.7px}
  .app>.hint:last-child{bottom:3px;right:0;width:10vw;max-width:130px;font-size:clamp(7px,1.15vh,9px)}

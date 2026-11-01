@@ -10,19 +10,19 @@
 
 @media (orientation:landscape) and (max-height:600px){
  body{min-height:100dvh;padding:4px max(8px,env(safe-area-inset-left)) 4px max(8px,env(safe-area-inset-right))}
- .app{width:100%;max-width:900px;height:calc(100dvh - 8px);margin:auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(112px,21vw);grid-template-rows:auto auto minmax(0,1fr) auto auto;gap:5px 10px;align-content:center}
+ .app{width:100%;max-width:980px;height:calc(100dvh - 8px);margin:auto;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto auto;gap:4px;align-content:center}
  .top{grid-column:1;grid-row:1;align-self:center}
  .scores{grid-column:1;grid-row:2;gap:6px}
- .scores div{padding:3px}.scores b{font-size:20px}.scores small{font-size:10px}
- .court{grid-column:1;grid-row:3;align-self:center;width:100%;min-width:0}
+ .scores div{padding:2px}.scores b{font-size:19px}.scores small{font-size:9px}
+ .court{grid-column:1;grid-row:3;align-self:center;justify-self:center;width:min(100%,calc((100dvh - 145px)*1.333));min-width:0}
  canvas{width:100%;height:auto;aspect-ratio:4/3}
  .court-actions{grid-column:1;grid-row:4;margin:0;gap:8px}
- .utility{height:34px;max-width:80px;font-size:19px}
- .controls{grid-column:2;grid-row:3;flex-direction:column;align-self:center;gap:8px}
- .control{height:clamp(62px,19dvh,100px);min-height:0;font-size:clamp(30px,7vh,44px)}
+ .utility{height:30px;max-width:76px;font-size:18px}
+ .controls{grid-column:1;grid-row:5;display:flex;flex-direction:row;justify-content:space-between;align-items:center;gap:12px}
+ .control{height:clamp(54px,14dvh,76px);width:clamp(84px,13vw,116px);flex:0 0 clamp(84px,13vw,116px);font-size:clamp(30px,7vh,42px)}
  .hint:first-of-type{display:none}
- .msg{grid-column:1 / -1;grid-row:5;min-height:12px;font-size:10px}
- .app>.hint:last-child{grid-column:2;grid-row:4;align-self:center;text-align:right;font-size:9px}
+ .msg{grid-column:1;grid-row:6;min-height:10px;font-size:9px}
+ .app>.hint:last-child{display:none}
 }
 ::selection{background:#78c88c;color:#102316}
 </style></head><body><div class="flash" id="flash"></div><main class="app">

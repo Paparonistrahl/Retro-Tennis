@@ -10,7 +10,7 @@
 
 @media (orientation:landscape) and (max-height:600px){
  body{min-height:100dvh;padding:2px max(5px,env(safe-area-inset-left)) 2px max(5px,env(safe-area-inset-right))}
- .app{position:relative;width:100%;max-width:none;height:calc(100dvh - 4px);margin:auto;display:grid;grid-template-columns:minmax(88px,10.5vw) minmax(0,1fr) minmax(88px,10.5vw);grid-template-rows:minmax(0,1fr);gap:4px;align-items:center}
+ .app{position:relative;width:100%;max-width:none;height:calc(100dvh - 4px);margin:auto;display:grid;grid-template-columns:minmax(78px,8.5vw) minmax(0,1fr) minmax(78px,8.5vw);grid-template-rows:minmax(0,1fr);gap:4px;align-items:center}
  .top{display:contents}
  .top span:first-child{grid-column:1;grid-row:1;align-self:start;justify-self:center;margin-top:3px;font-size:10px}
  .top span:last-child{grid-column:3;grid-row:1;align-self:start;justify-self:center;margin-top:3px;font-size:10px}
@@ -18,18 +18,18 @@
  .scores div:first-child{grid-column:1;grid-row:1;align-self:start;justify-self:stretch;margin:22px 2px 0;padding:2px}
  .scores div:last-child{grid-column:3;grid-row:1;align-self:start;justify-self:stretch;margin:22px 2px 0;padding:2px}
  .scores b{font-size:clamp(17px,3.5vh,24px)}.scores small{font-size:clamp(8px,1.8vh,11px)}
- .court{grid-column:2;grid-row:1;align-self:center;justify-self:center;width:min(100%,calc((100dvh - 4px)*1.333));min-width:0}
+ .court{grid-column:2;grid-row:1;align-self:center;justify-self:center;width:min(100%,calc((100dvh - 2px)*1.333));min-width:0}
  canvas{width:100%;height:auto;aspect-ratio:4/3}
  .court-actions{display:contents}
- .utility{position:absolute;top:4px;width:clamp(30px,3.4vw,42px);height:32px;max-width:none;padding:0;font-size:16px;z-index:10}
- #pause{left:calc(5px + 1vw)}
- #mute{left:calc(48px + 1vw)}
- #reset{right:calc(5px + 1vw)}
+ .utility{position:absolute;top:clamp(88px,22vh,118px);width:clamp(30px,3.4vw,42px);height:32px;max-width:none;padding:0;font-size:16px;z-index:10}
+ #pause{left:calc(4px + .6vw)}
+ #mute{left:calc(42px + .6vw)}
+ #reset{right:calc(4px + .6vw)}
  .controls{display:contents}
  #up{grid-column:1;grid-row:1;justify-self:center;align-self:center}
  #dn{grid-column:3;grid-row:1;justify-self:center;align-self:center}
  .control{height:clamp(104px,27dvh,154px);width:clamp(76px,9.5vw,112px);flex:0 0 clamp(76px,9.5vw,112px);font-size:clamp(46px,10vh,64px);opacity:.98}
- .hint:first-of-type,.app>.hint:last-child{display:none}
+ .app>.hint{display:none}
  .msg{grid-column:1;grid-row:1;align-self:end;justify-self:center;margin-bottom:clamp(38px,8vh,64px);min-height:10px;font-size:clamp(9px,1.8vh,12px);max-width:100%;text-align:center}
 }
 ::selection{background:#78c88c;color:#102316}

@@ -12,11 +12,11 @@
 <div class="top"><span>◈ PAPARONI</span><span id="status">BEREIT</span></div>
 <div class="scores"><div><small>PAPARONI</small><b id="s0">0</b></div><div><small>CHATGPT</small><b id="s1">0</b></div></div>
 <div class="court"><canvas id="c" width="800" height="600"></canvas>
-<div class="overlay" id="ov"><h1 id="ttl">RETRO TENNIS</h1><p id="sub">PAPARONI GEGEN CHATGPT · BIS 5 PUNKTE</p><button class="btn primary" id="start">▶ START</button></div>
+<div class="overlay" id="ov"><h1 id="ttl">RETRO TENNIS</h1><p id="sub">DU GEGEN CHATGPT · BIS 5 PUNKTE</p><button class="btn primary" id="start">▶ START</button></div>
 <div class="celebrate" id="celebrate"><img src="celebration.png" alt="Pixel-Art-Jubelbild"></div></div>
-<div class="hint">STEUERUNG PAPARONI</div><div class="controls"><button class="btn control" id="up" aria-label="Hoch">▲</button><button class="btn control" id="dn" aria-label="Runter">▼</button></div>
+<div class="hint">STEUERUNG</div><div class="controls"><button class="btn control" id="up" aria-label="Hoch">▲</button><button class="btn control" id="dn" aria-label="Runter">▼</button></div>
 <div class="actions"><button class="btn" id="pause">Ⅱ PAUSE</button><button class="btn" id="reset">↻ NEU</button></div>
-<div class="msg" id="msg">Tippe START – die Arcade-Musik beginnt!</div><div class="hint">PING BEIM TREFFER · YEAH + BLITZ BEI PUNKTVERLUST</div>
+<div class="msg" id="msg">Tippe START</div><div class="hint">PING BEIM TREFFER · YEAH + BLITZ BEI PUNKTVERLUST</div>
 </main>
 <script>
 (()=>{const $=id=>document.getElementById(id),c=$('c'),g=c.getContext('2d'),W=800,H=600,P=112;let py=244,ai=244,b={x:400,y:300,vx:0,vy:0},s=[0,0],state='ready',server=0,raf=0,keys={},ac=null,musicTimer=null,musicMode=0,note=0;

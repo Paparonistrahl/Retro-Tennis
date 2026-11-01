@@ -10,20 +10,24 @@
 
 @media (orientation:landscape) and (max-height:600px){
  body{min-height:100dvh;padding:3px max(6px,env(safe-area-inset-left)) 3px max(6px,env(safe-area-inset-right))}
- .app{position:relative;width:100%;max-width:1400px;height:calc(100dvh - 6px);margin:auto;display:grid;grid-template-columns:minmax(72px,12vw) minmax(0,1fr) minmax(72px,12vw);grid-template-rows:24px minmax(0,1fr) 12px;gap:3px 8px;align-items:center}
- .top{grid-column:2;grid-row:1;align-self:center;font-size:10px}
- .scores{grid-column:1;grid-row:1;display:flex;flex-direction:column;gap:5px;align-self:center}
- .scores div{padding:3px}.scores b{font-size:18px}.scores small{font-size:9px}
- .court{grid-column:2;grid-row:2;align-self:center;justify-self:center;width:min(100%,calc((100dvh - 52px)*1.333));min-width:0}
+ .app{position:relative;width:100%;max-width:none;height:calc(100dvh - 6px);margin:auto;display:grid;grid-template-columns:minmax(108px,14vw) minmax(0,1fr) minmax(108px,14vw);grid-template-rows:minmax(0,1fr);gap:5px;align-items:center}
+ .top{display:contents}
+ .top span:first-child{grid-column:1;grid-row:1;align-self:start;justify-self:center;margin-top:4px;font-size:10px}
+ .top span:last-child{grid-column:3;grid-row:1;align-self:start;justify-self:center;margin-top:4px;font-size:10px}
+ .scores{display:contents}
+ .scores div:first-child{grid-column:1;grid-row:1;align-self:start;justify-self:stretch;margin:24px 4px 0;padding:3px}
+ .scores div:last-child{grid-column:3;grid-row:1;align-self:start;justify-self:stretch;margin:24px 4px 0;padding:3px}
+ .scores b{font-size:clamp(18px,4vh,26px)}.scores small{font-size:clamp(9px,2vh,12px)}
+ .court{grid-column:2;grid-row:1;align-self:center;justify-self:center;width:min(100%,calc((100dvh - 10px)*1.333));min-width:0}
  canvas{width:100%;height:auto;aspect-ratio:4/3}
- .court-actions{grid-column:3;grid-row:1;display:flex;justify-content:flex-end;gap:4px;margin:0}
- .utility{width:clamp(22px,4vw,38px);height:28px;max-width:none;flex:0 1 38px;padding:0;font-size:16px}
+ .court-actions{grid-column:3;grid-row:1;align-self:end;justify-self:center;display:flex;flex-wrap:wrap;justify-content:center;gap:5px;margin:0 0 5px}
+ .utility{width:clamp(30px,4vw,42px);height:34px;max-width:none;flex:0 1 42px;padding:0;font-size:17px}
  .controls{display:contents}
- #up{grid-column:1;grid-row:2;justify-self:center;align-self:center}
- #dn{grid-column:3;grid-row:2;justify-self:center;align-self:center}
- .control{height:clamp(54px,16dvh,86px);width:clamp(60px,9vw,100px);flex:0 0 clamp(60px,9vw,100px);font-size:clamp(30px,7vh,44px);opacity:.96}
+ #up{grid-column:1;grid-row:1;justify-self:center;align-self:center}
+ #dn{grid-column:3;grid-row:1;justify-self:center;align-self:center}
+ .control{height:clamp(86px,23dvh,132px);width:clamp(76px,10vw,116px);flex:0 0 clamp(76px,10vw,116px);font-size:clamp(40px,9vh,58px);opacity:.98}
  .hint:first-of-type,.app>.hint:last-child{display:none}
- .msg{grid-column:2;grid-row:3;min-height:10px;font-size:9px;align-self:center}
+ .msg{grid-column:1;grid-row:1;align-self:end;justify-self:center;margin-bottom:7px;min-height:10px;font-size:9px;max-width:100%;text-align:center}
 }
 ::selection{background:#78c88c;color:#102316}
 </style></head><body><div class="flash" id="flash"></div><main class="app">

@@ -43,17 +43,17 @@
 }
 /* Safari-Browser: Platz für die Browserleisten einplanen */
 @media (orientation:landscape) and (max-height:600px) and (display-mode:browser){
- body{padding:4px max(6px,env(safe-area-inset-left)) 4px max(6px,env(safe-area-inset-right))}
- .app{height:calc(100dvh - 8px);grid-template-columns:minmax(112px,16vw) minmax(0,1fr) minmax(112px,16vw);gap:5px}
- .court{width:min(100%,calc((100dvh - 118px)*1.333))}
- .utility{top:clamp(76px,18vh,104px);width:34px;height:32px}
- #pause{left:calc((max(112px,16vw) - 73px)/2)}
- #mute{left:calc((max(112px,16vw) - 73px)/2 + 39px)}
- #reset{right:calc((max(112px,16vw) - 34px)/2)}
- .control{height:clamp(76px,18dvh,112px);width:clamp(68px,8vw,92px);flex-basis:clamp(68px,8vw,92px);font-size:clamp(36px,7vh,50px)}
- .top span:last-child{top:auto;bottom:19vh;right:1vw;width:min(14vw,170px);font-size:clamp(9px,1.6vh,12px);text-align:center}
- .app>.hint:last-child{bottom:3px;right:1vw;width:min(14vw,170px);font-size:clamp(8px,1.5vh,10px)}
- .msg{margin-bottom:clamp(30px,6vh,46px);font-size:clamp(8px,1.5vh,10px)}
+ body{padding:2px max(4px,env(safe-area-inset-left)) 2px max(4px,env(safe-area-inset-right))}
+ .app{height:calc(100dvh - 4px);grid-template-columns:minmax(82px,10vw) minmax(0,1fr) minmax(82px,10vw);gap:3px}
+ .court{width:min(100%,calc((100dvh - 12px)*1.333))}
+ .utility{top:6vh;width:34px;height:32px}
+ #pause{left:calc((max(82px,10vw) - 73px)/2)}
+ #mute{left:calc((max(82px,10vw) - 73px)/2 + 39px)}
+ #reset{right:calc((max(82px,10vw) - 34px)/2)}
+ .control{height:clamp(82px,22dvh,126px);width:clamp(68px,8vw,92px);flex-basis:clamp(68px,8vw,92px);font-size:clamp(38px,8vh,54px)}
+ .top span:last-child{top:auto;bottom:18vh;right:1vw;width:min(9vw,110px);font-size:clamp(8px,1.5vh,11px);text-align:center;letter-spacing:1px}
+ .app>.hint:last-child{bottom:3px;right:1vw;width:min(9vw,110px);font-size:clamp(7px,1.3vh,9px)}
+ .msg{margin-bottom:clamp(26px,5vh,38px);font-size:clamp(8px,1.4vh,10px)}
 }
 /* Home-Bildschirm: den verfügbaren Vollbildbereich stärker ausnutzen */
 @media (orientation:landscape) and (max-height:600px) and (display-mode:standalone){

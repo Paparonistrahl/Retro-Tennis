@@ -69,6 +69,13 @@ const heldDirections=new Map();
 function syncHeldDirection(){let latest=[...heldDirections.values()].at(-1);if(latest)direction(latest)}
 $('dpad').querySelectorAll('button').forEach(b=>{
   b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture?.(e.pointerId);heldDirections.delete(e.pointerId);heldDirections.set(e.pointerId,b.dataset.dir);direction(b.dataset.dir)});
+  b.addEventListener('pointermove',e=>{
+    if(!heldDirections.has(e.pointerId))return;
+    const target=document.elementFromPoint(e.clientX,e.clientY)?.closest('#dpad button[data-dir]');
+    if(target&&target.dataset.dir!==heldDirections.get(e.pointerId)){
+      heldDirections.delete(e.pointerId);heldDirections.set(e.pointerId,target.dataset.dir);direction(target.dataset.dir);
+    }
+  });
   const release=e=>{if(heldDirections.delete(e.pointerId))syncHeldDirection()};
   b.addEventListener('pointerup',release);
   b.addEventListener('pointercancel',release);

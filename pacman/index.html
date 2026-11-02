@@ -65,7 +65,15 @@ let accum=0,tick=0;
 function pause(){if(!running)return;running=false;cancelAnimationFrame(raf);show('PAUSE','Kurze Verschnaufpause?','▶ WEITER')}
 $('start').addEventListener('click',()=>{if($('headline').textContent==='PAUSE'){ $('overlay').style.display='none';running=true;last=0;raf=requestAnimationFrame(loop);return}start()});
 $('sound').onclick=()=>{muted=!muted;$('sound').textContent=muted?'🔇':'🔊'};
-$('dpad').querySelectorAll('button').forEach(b=>{b.addEventListener('pointerdown',e=>{e.preventDefault();direction(b.dataset.dir)})});
+const heldDirections=new Map();
+function syncHeldDirection(){let latest=[...heldDirections.values()].at(-1);if(latest)direction(latest)}
+$('dpad').querySelectorAll('button').forEach(b=>{
+  b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture?.(e.pointerId);heldDirections.delete(e.pointerId);heldDirections.set(e.pointerId,b.dataset.dir);direction(b.dataset.dir)});
+  const release=e=>{if(heldDirections.delete(e.pointerId))syncHeldDirection()};
+  b.addEventListener('pointerup',release);
+  b.addEventListener('pointercancel',release);
+  b.addEventListener('lostpointercapture',release);
+});
 
 addEventListener('keydown',e=>{let m={ArrowUp:'up',w:'up',ArrowDown:'down',s:'down',ArrowLeft:'left',a:'left',ArrowRight:'right',d:'right'};if(m[e.key]){e.preventDefault();direction(m[e.key])}if(e.key===' '){e.preventDefault();pause()}});
 let sx=0,sy=0;canvas.addEventListener('pointerdown',e=>{sx=e.clientX;sy=e.clientY});canvas.addEventListener('pointerup',e=>{let dx=e.clientX-sx,dy=e.clientY-sy;if(Math.max(Math.abs(dx),Math.abs(dy))>18)direction(Math.abs(dx)>Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up'))});

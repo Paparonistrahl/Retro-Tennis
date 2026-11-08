@@ -30,8 +30,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json({ error: "POST required" }, 405);
 
-  const url = Deno.env.get("SUPABASE_URL")!;
-  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const url = Deno.env.get("PROJECT_URL")!;
+  const serviceKey = Deno.env.get("PROJECT_SECRET_KEY")!;
   const signingSecret = Deno.env.get("PACMAN_SIGNING_SECRET")!;
   if (!url || !serviceKey || !signingSecret) return json({ error: "Server not configured" }, 500);
   const db = createClient(url, serviceKey, { auth: { persistSession: false } });

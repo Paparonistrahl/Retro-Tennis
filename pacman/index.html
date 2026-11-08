@@ -49,12 +49,26 @@ function resetActors(){pac={x:10,y:15,dir:'left',want:'left',step:0};ghosts=[{x:
 function countDots(){remaining=map.flat().filter(v=>v==='.'||v==='o').length}
 function fresh(){map=raw.map(r=>(r+' '.repeat(C)).slice(0,C).split(''));map[15][10]=' ';resetActors();countDots();score=0;lives=3;power=0;updateUI()}
 function updateUI(){$('score').textContent=score;$('lives').textContent=lives;$('high').textContent=high}
-function chirp(freq=500,dur=.07){if(muted)return;try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();audioCtx.resume();let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='square';o.frequency.value=freq;g.gain.setValueAtTime(.035,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+dur);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+dur)}catch(e){}}
+let wakaFlip=0;
+function tone(freq,dur=.09,volume=.045,type='square',endFreq=freq,delay=0){
+ if(muted)return;
+ try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();audioCtx.resume();
+ let t=audioCtx.currentTime+delay,o=audioCtx.createOscillator(),g=audioCtx.createGain();
+ o.type=type;o.frequency.setValueAtTime(freq,t);o.frequency.exponentialRampToValueAtTime(Math.max(30,endFreq),t+dur);
+ g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(volume,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+ o.connect(g);g.connect(audioCtx.destination);o.start(t);o.stop(t+dur+.015)
+ }catch(e){}
+}
+function chirp(freq=500,dur=.07){tone(freq,dur,.035)}
+function waka(){wakaFlip^=1;tone(wakaFlip?520:390,.075,.035,'square',wakaFlip?260:210)}
+function powerSound(){tone(660,.12,.045,'square',880);tone(880,.12,.04,'square',1100,.12);tone(1100,.16,.04,'square',1320,.24)}
+function eatGhostSound(){[440,660,880,1180].forEach((f,i)=>tone(f,.11,.05,'square',f*1.35,i*.075))}
+function deathSound(){[520,440,360,280,200,130].forEach((f,i)=>tone(f,.16,.05,'sawtooth',Math.max(60,f*.72),i*.12))}
 function direction(d){if(!dirs[d])return;pac.want=d;$('dpad').querySelectorAll('button').forEach(b=>b.classList.toggle('selected',b.dataset.dir===d))}
-function movePac(){if(!wall(pac.x+dirs[pac.want][0],pac.y+dirs[pac.want][1]))pac.dir=pac.want;let [dx,dy]=dirs[pac.dir];if(!wall(pac.x+dx,pac.y+dy)){pac.x+=dx;pac.y+=dy;pac.step++}let v=map[pac.y][pac.x];if(v==='.'||v==='o'){map[pac.y][pac.x]=' ';score+=v==='o'?50:10;if(v==='o')power=Date.now()+7000;remaining--;chirp(v==='o'?880:620,.045);if(score>high){high=score;localStorage.setItem('paparoni-pac-high',high)}updateUI();if(!remaining){running=false;show('GEWONNEN!','Das Labyrinth ist leer. Starke Runde!', '↻ NOCHMAL')}}}
+function movePac(){if(!wall(pac.x+dirs[pac.want][0],pac.y+dirs[pac.want][1]))pac.dir=pac.want;let [dx,dy]=dirs[pac.dir];if(!wall(pac.x+dx,pac.y+dy)){pac.x+=dx;pac.y+=dy;pac.step++}let v=map[pac.y][pac.x];if(v==='.'||v==='o'){map[pac.y][pac.x]=' ';score+=v==='o'?50:10;if(v==='o'){power=Date.now()+7000;powerSound()}else waka();remaining--;if(score>high){high=score;localStorage.setItem('paparoni-pac-high',high)}updateUI();if(!remaining){running=false;show('GEWONNEN!','Das Labyrinth ist leer. Starke Runde!', '↻ NOCHMAL')}}}
 function ghostOptions(g){return Object.keys(dirs).filter(d=>d!==opposite[g.dir]&&!wall(g.x+dirs[d][0],g.y+dirs[d][1]))}
 function moveGhost(g){let opts=ghostOptions(g);if(!opts.length)opts=[opposite[g.dir]];let frightened=Date.now()<power;let target=opts.map(d=>{let x=g.x+dirs[d][0],y=g.y+dirs[d][1],dist=Math.abs(x-pac.x)+Math.abs(y-pac.y);return{d,dist}});target.sort((a,b)=>frightened?b.dist-a.dist:a.dist-b.dist);let choice=target[0];if(Math.random()<.24)choice=target[Math.floor(Math.random()*target.length)];g.dir=choice.d;g.x+=dirs[g.dir][0];g.y+=dirs[g.dir][1];}
-function collide(){for(let g of ghosts){if(g.x===pac.x&&g.y===pac.y){if(Date.now()<power){score+=200;g.x=10;g.y=11;g.dir='up';chirp(260,.18);updateUI()}else{lives--;updateUI();chirp(110,.3);if(lives<=0){running=false;show('GAME OVER','Die Geister waren diesmal schneller.','↻ NOCHMAL')}else{resetActors()}return}}}}
+function collide(){for(let g of ghosts){if(g.x===pac.x&&g.y===pac.y){if(Date.now()<power){score+=200;g.x=10;g.y=11;g.dir='up';eatGhostSound();updateUI()}else{lives--;updateUI();deathSound();if(lives<=0){running=false;show('GAME OVER','Die Geister waren diesmal schneller.','↻ NOCHMAL')}else{resetActors()}return}}}}
 function show(title,txt,button){$('headline').textContent=title;$('intro').innerHTML=txt;$('start').textContent=button;$('overlay').style.display='flex'}
 function start(){if(running)return;if(lives<=0||remaining===0)fresh();$('overlay').style.display='none';running=true;paused=false;last=0;raf=requestAnimationFrame(loop);chirp(740,.1)}
 function drawPac(){let p=center(pac.x,pac.y),mouth=.18+Math.abs(Math.sin(Date.now()/75))*.34,angle={right:0,left:Math.PI,up:-Math.PI/2,down:Math.PI/2}[pac.dir];ctx.fillStyle='#ffe34d';ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.arc(p.x,p.y,8,angle+mouth,angle+Math.PI*2-mouth);ctx.closePath();ctx.fill()}

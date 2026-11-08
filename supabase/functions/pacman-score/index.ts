@@ -67,8 +67,9 @@ Deno.serve(async (req) => {
 
     const { data: sessionRow, error: readError } = await db.from("pacman_score_sessions").select("nonce,submitted_at").eq("nonce", session.nonce).maybeSingle();
     if (readError || !sessionRow || sessionRow.submitted_at) return json({ error: "Session already used or unknown" }, 409);
-    const { error: useError } = await db.from("pacman_score_sessions").update({ submitted_at: new Date().toISOString() }).eq("nonce", session.nonce).is("submitted_at", null);
+    const { data: claimed, error: useError } = await db.from("pacman_score_sessions").update({ submitted_at: new Date().toISOString() }).eq("nonce", session.nonce).is("submitted_at", null).select("nonce").maybeSingle();
     if (useError) throw useError;
+    if (!claimed) return json({ error: "Session already submitted" }, 409);
     const { error: insertError } = await db.from("pacman_scores").insert({ player_name: name, score });
     if (insertError) throw insertError;
     return json({ ok: true });

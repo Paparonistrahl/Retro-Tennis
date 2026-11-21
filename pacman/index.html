@@ -90,7 +90,7 @@ const RANK_KEY='paparoni-pac-top10',SUPABASE_URL='https://uogpihezqbcumplwrasw.s
 function start(){if(running)return;homeRanksOpen=false;$('rankPanel').style.display='none';$('highscoreBtn').textContent='🏆 HIGHSCORE';pendingRank=false;sessionToken='';if(nextLevel){level++;map=makeLevel(level);resetActors();countDots();power=0;nextLevel=false;updateUI()}else if(lives<=0||remaining===0)fresh();$('overlay').style.display='none';running=true;paused=false;last=0;raf=requestAnimationFrame(loop);chirp(740,.1);startMusic();fetch(SUPABASE_URL+'/functions/v1/bright-service',{method:'POST',headers:{apikey:SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({action:'start'}),signal:AbortSignal.timeout(7000)}).then(async r=>{const d=await r.json().catch(()=>({}));if(r.ok)sessionToken=d.token||'';else console.warn('Secure score session unavailable',d.error||r.status)}).catch(e=>console.warn('Secure score session unavailable',e))}
 function drawPac(){
  const p=center(pac.x,pac.y),now=Date.now(),powered=now<power,angle={right:0,left:Math.PI,up:-Math.PI/2,down:Math.PI/2}[pac.dir];
- ctx.save();ctx.translate(p.x,p.y);ctx.rotate(angle);ctx.scale(1.48,1.48);
+ ctx.save();ctx.translate(p.x,p.y);ctx.rotate(angle);ctx.scale(1.18,1.18);
  // Bright outline and glow give Paparoni a strong silhouette against the maze.
  ctx.shadowColor=powered?'#ffb52e':'#ff344b';ctx.shadowBlur=powered?17:11;
  ctx.fillStyle=powered?'#ff9d20':'#f32638';ctx.strokeStyle='#fff2c8';ctx.lineWidth=1.8;ctx.lineJoin='round';
@@ -112,9 +112,9 @@ function drawPac(){
  ctx.fillStyle=powered?'#fff27a':'#ffe34d';ctx.beginPath();ctx.moveTo(7,1);ctx.lineTo(11,1+Math.sin(now/65)*3.5);ctx.lineTo(7,5);ctx.closePath();ctx.fill();
  if(powered){ctx.strokeStyle='#fff07a';ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(0,0,14,0,Math.PI*2);ctx.stroke()}
  ctx.restore();
- // Draw the smaller chef hat in screen coordinates so it always stays upright.
- ctx.save();ctx.translate(p.x,p.y);ctx.scale(1.48,1.48);ctx.translate(-1,-12);ctx.scale(.78,.78);ctx.translate(1,12);
- ctx.fillStyle='#fff7e5';ctx.strokeStyle='#d7c7a5';ctx.lineWidth=1;
+ // Draw a compact chef hat above Paparoni in fixed screen orientation.
+ ctx.save();ctx.translate(p.x,p.y-9);ctx.scale(.76,.76);
+ ctx.fillStyle='#fff7e5';ctx.strokeStyle='#d7c7a5';ctx.lineWidth=1.2;
  ctx.beginPath();ctx.ellipse(-1,-10,7.5,5.4,0,0,Math.PI*2);ctx.fill();ctx.stroke();
  ctx.beginPath();ctx.ellipse(-5,-12,4.3,4.5,0,0,Math.PI*2);ctx.fill();ctx.stroke();
  ctx.beginPath();ctx.ellipse(1,-14,4.6,5,0,0,Math.PI*2);ctx.fill();ctx.stroke();

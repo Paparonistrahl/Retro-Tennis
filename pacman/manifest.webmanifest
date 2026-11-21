@@ -1,1 +1,1 @@
-{"name":"PaparoniPac","short_name":"PaparoniPac","start_url":"./","scope":"./","display":"standalone","orientation":"any","background_color":"#080b20","theme_color":"#080b20","icons":[{"src":"icons/paparoni-icon.svg?v=12","sizes":"any","type":"image/svg+xml","purpose":"any"}]}
+{"name":"PaparoniPac","short_name":"PaparoniPac","start_url":"./","scope":"./","display":"standalone","orientation":"any","background_color":"#080b20","theme_color":"#080b20","icons":[{"src":"icons/paparoni-512.png?v=13","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}

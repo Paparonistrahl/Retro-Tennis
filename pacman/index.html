@@ -90,7 +90,7 @@ const RANK_KEY='paparoni-pac-top10',SUPABASE_URL='https://uogpihezqbcumplwrasw.s
 function start(){if(running)return;homeRanksOpen=false;$('rankPanel').style.display='none';$('highscoreBtn').textContent='🏆 HIGHSCORE';pendingRank=false;sessionToken='';if(nextLevel){level++;map=makeLevel(level);resetActors();countDots();power=0;nextLevel=false;updateUI()}else if(lives<=0||remaining===0)fresh();$('overlay').style.display='none';running=true;paused=false;last=0;raf=requestAnimationFrame(loop);chirp(740,.1);startMusic();fetch(SUPABASE_URL+'/functions/v1/bright-service',{method:'POST',headers:{apikey:SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({action:'start'}),signal:AbortSignal.timeout(7000)}).then(async r=>{const d=await r.json().catch(()=>({}));if(r.ok)sessionToken=d.token||'';else console.warn('Secure score session unavailable',d.error||r.status)}).catch(e=>console.warn('Secure score session unavailable',e))}
 function drawPac(){
  const p=center(pac.x,pac.y),now=Date.now(),powered=now<power,angle={right:0,left:Math.PI,up:-Math.PI/2,down:Math.PI/2}[pac.dir];
- ctx.save();ctx.translate(p.x,p.y);ctx.rotate(angle);ctx.scale(1.18,1.18);
+ ctx.save();ctx.translate(p.x,p.y);/* Keep the complete pepper head and face upright in every travel direction. */ctx.scale(1.18,1.18);
  // Bright outline and glow give Paparoni a strong silhouette against the maze.
  ctx.shadowColor=powered?'#ffb52e':'#ff344b';ctx.shadowBlur=powered?17:11;
  ctx.fillStyle=powered?'#ff9d20':'#f32638';ctx.strokeStyle='#fff2c8';ctx.lineWidth=1.8;ctx.lineJoin='round';

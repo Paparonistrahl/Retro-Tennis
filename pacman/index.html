@@ -100,12 +100,7 @@ function drawPac(){
  // Green pepper top.
  ctx.strokeStyle='#64ef52';ctx.lineWidth=3;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(1,-10);ctx.quadraticCurveTo(2,-15,7,-13);ctx.stroke();
  ctx.fillStyle='#48c83e';ctx.beginPath();ctx.ellipse(6,-13,4,2, -.4,0,Math.PI*2);ctx.fill();
- // Big, unmistakable chef hat.
- ctx.fillStyle='#fff7e5';ctx.strokeStyle='#d7c7a5';ctx.lineWidth=1;
- ctx.beginPath();ctx.ellipse(-1,-10,7.5,5.4,0,0,Math.PI*2);ctx.fill();ctx.stroke();
- ctx.beginPath();ctx.ellipse(-5,-12,4.3,4.5,0,0,Math.PI*2);ctx.fill();ctx.stroke();
- ctx.beginPath();ctx.ellipse(1,-14,4.6,5,0,0,Math.PI*2);ctx.fill();ctx.stroke();
- ctx.fillRect(-7,-10,12,3);ctx.strokeRect(-7,-10,12,3);
+
  // Oversized dark sunglasses with bright rims.
  ctx.fillStyle='#07152d';ctx.strokeStyle='#a9e4ff';ctx.lineWidth=1.1;
  ctx.beginPath();ctx.roundRect(-6,-5,6,5,1.5);ctx.fill();ctx.stroke();
@@ -117,6 +112,14 @@ function drawPac(){
  // Animated open bite, remains readable at small scale.
  ctx.fillStyle=powered?'#fff27a':'#ffe34d';ctx.beginPath();ctx.moveTo(7,1);ctx.lineTo(11,1+Math.sin(now/65)*3.5);ctx.lineTo(7,5);ctx.closePath();ctx.fill();
  if(powered){ctx.strokeStyle='#fff07a';ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(0,0,14,0,Math.PI*2);ctx.stroke()}
+ ctx.restore();
+ // Draw the smaller chef hat in screen coordinates so it always stays upright.
+ ctx.save();ctx.translate(p.x,p.y);ctx.scale(1.48,1.48);ctx.translate(-1,-12);ctx.scale(.78,.78);ctx.translate(1,12);
+ ctx.fillStyle='#fff7e5';ctx.strokeStyle='#d7c7a5';ctx.lineWidth=1;
+ ctx.beginPath();ctx.ellipse(-1,-10,7.5,5.4,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+ ctx.beginPath();ctx.ellipse(-5,-12,4.3,4.5,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+ ctx.beginPath();ctx.ellipse(1,-14,4.6,5,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+ ctx.fillRect(-7,-10,12,3);ctx.strokeRect(-7,-10,12,3);
  ctx.restore()
 }
 function drawGhost(g){if(g.eatenUntil&&Date.now()<g.eatenUntil)return;let p=center(g.x,g.y),now=Date.now(),fright=now<power,blink=fright&&(power-now)<=2000&&Math.floor(now/150)%2===0,blue=fright&&!blink;ctx.save();ctx.translate(p.x,p.y);if(Math.abs(dirs[g.dir]?.[0]||0)>0)ctx.rotate((dirs[g.dir][0]>0?1:-1)*.08);let leg='#173f2d',green=blue?'#3478ff':'#16834b',head=blue?'#6aa3ff':'#27b96a',wing=blue?'#244fc5':'#a95c28',wingHi=blue?'#5b8bff':'#d58a43';ctx.strokeStyle=leg;ctx.lineWidth=1.7;ctx.lineCap='round';for(let side of [-1,1])for(let yy of [-4,0,4]){ctx.beginPath();ctx.moveTo(side*5,yy);ctx.lineTo(side*9,yy-2);ctx.lineTo(side*10,yy+2);ctx.stroke()}ctx.beginPath();ctx.moveTo(-3,-7);ctx.quadraticCurveTo(-8,-13,-6,-14);ctx.moveTo(3,-7);ctx.quadraticCurveTo(8,-13,6,-14);ctx.stroke();ctx.fillStyle=wing;ctx.beginPath();ctx.ellipse(0,2,7.2,9.2,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle=wingHi;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,-6);ctx.lineTo(0,10);ctx.stroke();ctx.fillStyle=green;ctx.beginPath();ctx.ellipse(0,-5,5.2,4.2,0,0,Math.PI*2);ctx.fill();ctx.fillStyle=head;ctx.beginPath();ctx.arc(0,-9,3.8,0,Math.PI*2);ctx.fill();ctx.fillStyle='#10251b';ctx.beginPath();ctx.arc(-1.5,-9,1,0,Math.PI*2);ctx.arc(1.5,-9,1,0,Math.PI*2);ctx.fill();ctx.restore()}

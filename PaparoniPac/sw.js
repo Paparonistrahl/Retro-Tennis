@@ -1,4 +1,4 @@
-const CACHE='paparonipac-v74';
+const CACHE='paparonipac-v75';
 const FILES=[
   './',
   './index.html',
@@ -29,16 +29,30 @@ self.addEventListener('activate',event=>{
   );
 });
 self.addEventListener('fetch',event=>{
-  if(event.request.method!=='GET')return;
-  event.respondWith(
-    fetch(event.request)
-      .then(response=>{
-        if(response.ok){
-          const copy=response.clone();
-          caches.open(CACHE).then(cache=>cache.put(event.request,copy));
-        }
-        return response;
-      })
-      .catch(()=>caches.match(event.request).then(cached=>cached||caches.match('./index.html')))
-  );
+  const request=event.request;
+  if(request.method!=='GET')return;
+  const url=new URL(request.url);
+  if(url.origin!==self.location.origin)return;
+  const isDocument=request.mode==='navigate'||url.pathname.endsWith('/index.html');
+  event.respondWith((async()=>{
+    try{
+      // HTML must bypass the browser HTTP cache: installed iOS PWAs can otherwise
+      // boot an old document even after the new service worker has activated.
+      const networkRequest=isDocument?new Request(request,{cache:'no-store'}):request;
+      const response=await fetch(networkRequest);
+      if(response.ok){
+        const cache=await caches.open(CACHE);
+        await cache.put(request,response.clone());
+      }
+      return response;
+    }catch(error){
+      const cached=await caches.match(request);
+      if(cached)return cached;
+      if(isDocument){
+        const offline=await caches.match('./index.html');
+        if(offline)return offline;
+      }
+      return new Response('Offline', {status:503,statusText:'Offline'});
+    }
+  })());
 });

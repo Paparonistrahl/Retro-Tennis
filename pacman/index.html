@@ -130,10 +130,7 @@ function ensureMusicGain(){
  if(audioCtx.state==='suspended')audioCtx.resume();
 }
 function duckMusic(ms=420){
- if(muted||!gameMusicGain)return;
- gameMusicGain.gain.setTargetAtTime(MUSIC_GAIN*.1,audioCtx.currentTime,.015);
- if(musicDuckTimer)clearTimeout(musicDuckTimer);
- musicDuckTimer=setTimeout(()=>{musicDuckTimer=0;if(!muted&&running&&gameMusicGain)gameMusicGain.gain.setTargetAtTime(MUSIC_GAIN,audioCtx.currentTime,.06)},Math.max(260,ms));
+ // Keep WAV soundtrack at the same level during and between game sound effects.
 }
 function startMusic(){
  if(muted||!running)return;

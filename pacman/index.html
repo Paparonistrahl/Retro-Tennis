@@ -117,7 +117,7 @@ function deathSound(){[520,440,360,280,200,130].forEach((f,i)=>tone(f,.16,.05,'s
 const gameMusic=new Audio('assets/PaparoniPac_Soundteppich_24s_Stil.wav');
 gameMusic.loop=true;gameMusic.preload='auto';gameMusic.volume=1;
 let gameMusicSource=null,gameMusicGain=null,musicDuckTimer=0;
-const MUSIC_GAIN=.2; // five times quieter than full-scale audio
+const MUSIC_GAIN=.1; // five times quieter than full-scale audio
 function ensureMusicGain(){
  if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
  if(!gameMusicSource){

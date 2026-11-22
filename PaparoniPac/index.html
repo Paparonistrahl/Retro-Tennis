@@ -214,21 +214,29 @@ function startScreenMusic(){if(!muted)playWavMusic()}
 function stopScreenMusic(){stopMusic()}
 function clearPadHighlight(){if(activeTouches.size===0)dpad.querySelectorAll('button').forEach(b=>b.classList.remove('selected'))}function direction(d){if(!dirs[d])return;pac.want=d;$('dpad').querySelectorAll('button').forEach(b=>b.classList.toggle('selected',b.dataset.dir===d))}
 let gamepadLastDirection='',gamepadLastAt=0,gamepadButtonState=[];
-let gamepadMenuIndex=0;
+let gamepadMenuIndex=0,gamepadMenuTargetKey='';
 function gamepadMenuTargets(){
- if($('launchScreen'))return [$('launchEnter'),$('launchRefresh')].filter(b=>b&&!b.disabled&&b.getClientRects().length);
- const overlay=$('overlay');
- if(overlay&&getComputedStyle(overlay).display!=='none')return [$('start'),$('highscoreBtn'),$('gamepadControl')].filter(b=>b&&!b.disabled&&b.getClientRects().length);
- return [];
+ const root=$('launchScreen')||$('overlay');
+ if(!root||getComputedStyle(root).display==='none')return [];
+ const targets=Array.from(root.querySelectorAll('button:not(:disabled)')).filter(b=>{
+  const r=b.getBoundingClientRect(),s=getComputedStyle(b);
+  return r.width>0&&r.height>0&&s.display!=='none'&&s.visibility!=='hidden';
+ });
+ const key=targets.map(b=>b.id||b.textContent.trim()).join('|');
+ if(key!==gamepadMenuTargetKey){gamepadMenuTargetKey=key;gamepadMenuIndex=0}
+ return targets;
 }
 function gamepadMenuMove(dir){
+ direction(dir);
  const targets=gamepadMenuTargets();if(!targets.length)return;
  gamepadMenuIndex=(gamepadMenuIndex+(dir==='up'||dir==='left'?-1:1)+targets.length)%targets.length;
 }
 function gamepadMenuSelect(){
  const targets=gamepadMenuTargets();if(!targets.length)return;
- gamepadMenuIndex=Math.min(gamepadMenuIndex,targets.length-1);
- targets[gamepadMenuIndex].click();
+ gamepadMenuIndex=((gamepadMenuIndex%targets.length)+targets.length)%targets.length;
+ const target=targets[gamepadMenuIndex];
+ target.focus({preventScroll:true});
+ target.click();
 }
 function pollGamepad(){
  const pad=connectedGamepad();
@@ -237,7 +245,7 @@ function pollGamepad(){
  const pressed=i=>!!buttons[i]?.pressed,edge=i=>pressed(i)&&!gamepadButtonState[i];
  const launch=!!$('launchScreen');
  const menu=!launch&&!running&&getComputedStyle($('overlay')).display!=='none';
- if(edge(0)&&(launch||menu))gamepadMenuSelect();
+ if((edge(0)||edge(1)||edge(2)||edge(3))&&(launch||menu))gamepadMenuSelect();
  else if(edge(0)&&!launch&&!menu){
   if(running)pause();
   else if($('headline').textContent==='PAUSE'){
@@ -256,8 +264,8 @@ function pollGamepad(){
  if(!dir){gamepadLastDirection='';return}
  const now=Date.now(),menuNav=(launch||menu)&&!running;
  if(dir!==gamepadLastDirection||now-gamepadLastAt>(menuNav?210:170)){
-  if(running)direction(dir);
-  else if(menuNav)gamepadMenuMove(dir);
+  if(menuNav)gamepadMenuMove(dir);
+  else if(running)direction(dir);
   gamepadLastDirection=dir;gamepadLastAt=now;
  }
 }

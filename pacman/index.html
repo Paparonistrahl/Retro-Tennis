@@ -114,14 +114,14 @@ function eatGhostSound(){[440,660,880,1180].forEach((f,i)=>tone(f,.11,.05,'squar
 function deathSound(){[520,440,360,280,200,130].forEach((f,i)=>tone(f,.16,.05,'sawtooth',Math.max(60,f*.72),i*.12))}
 // Original PaparoniPac soundtrack: use the uploaded WAV, not synthesized background music.
 const gameMusic=new Audio('assets/PaparoniPac_Soundteppich_24s_Stil.wav');
-gameMusic.loop=true;gameMusic.preload='auto';gameMusic.volume=.0008333333;
+gameMusic.loop=true;gameMusic.preload='auto';gameMusic.volume=.0001666667;
 let musicDuckTimer=0;
 function duckMusic(ms=420){
  if(muted)return;
  // Keep the soundtrack well below the effects while a game sound is playing.
- gameMusic.volume=.0000833333;
+ gameMusic.volume=.0000166667;
  if(musicDuckTimer)clearTimeout(musicDuckTimer);
- musicDuckTimer=setTimeout(()=>{musicDuckTimer=0;if(!muted&&running)gameMusic.volume=.0008333333},Math.max(260,ms));
+ musicDuckTimer=setTimeout(()=>{musicDuckTimer=0;if(!muted&&running)gameMusic.volume=.0001666667},Math.max(260,ms));
 }
 function startMusic(){
  if(muted||!running)return;

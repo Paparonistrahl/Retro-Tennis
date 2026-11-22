@@ -1,5 +1,5 @@
-// Supabase Edge Function: pacman-score
-// Deploy with SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY and PACMAN_SIGNING_SECRET.
+// Supabase Edge Function: paparoni-pac-score
+// Deploy with SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY and PAPARONIPAC_SIGNING_SECRET.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const cors = {
@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
 
   const url = Deno.env.get("PROJECT_URL")!;
   const serviceKey = Deno.env.get("PROJECT_SECRET_KEY")!;
-  const signingSecret = Deno.env.get("PACMAN_SIGNING_SECRET")!;
+  const signingSecret = Deno.env.get("PAPARONIPAC_SIGNING_SECRET")!;
   if (!url || !serviceKey || !signingSecret) return json({ error: "Server not configured" }, 500);
   const db = createClient(url, serviceKey, { auth: { persistSession: false } });
 

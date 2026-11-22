@@ -125,27 +125,27 @@ function startMusic(){
 }
 function stopMusic(){if(musicTimer){clearInterval(musicTimer);musicTimer=0}}
 let screenMusicTimer=0,screenMusicStep=0,screenMusicGain=null,screenPadOsc=[];
-const screenNotes=[523,659,784,659,587,698,880,698,523,659,784,988,880,784,659,587];
+const screenNotes=[523,523,523,587,622,622,698,698,698,587,587,523,523,466,466,523,523,622,622,784,784,698,698,622];
 function startScreenMusic(){
  if(muted||screenMusicTimer)return;
  try{
   audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();audioCtx.resume();
   const now=audioCtx.currentTime;
-  screenMusicGain=audioCtx.createGain();screenMusicGain.gain.setValueAtTime(.38,now);screenMusicGain.connect(audioCtx.destination);
+  screenMusicGain=audioCtx.createGain();screenMusicGain.gain.setValueAtTime(.55,now);screenMusicGain.connect(audioCtx.destination);
   // Soft mid-range chord bed (no sub-bass), with a gentle 24-second dynamic cycle.
   const chordSets=[[262,330,392],[294,349,440],[247,311,370],[262,330,392],[330,392,494],[294,349,440]];
   screenPadOsc=[];
-  chordSets[0].forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.value=f;g.gain.value=.012; o.connect(g);g.connect(screenMusicGain);o.start();screenPadOsc.push({o,g})});
+  chordSets[0].forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.value=f;g.gain.value=.016; o.connect(g);g.connect(screenMusicGain);o.start();screenPadOsc.push({o,g})});
   screenMusicStep=0;
   const playStep=()=>{
    if(muted||(!document.querySelector('.home-screen')&&!document.querySelector('.arcade-screen'))){stopScreenMusic();return}
    const t=audioCtx.currentTime,n=screenNotes[screenMusicStep%screenNotes.length];
    const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='triangle';o.frequency.setValueAtTime(n,t);
-   g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.018,t+.025);g.gain.exponentialRampToValueAtTime(.0001,t+.34);o.connect(g);g.connect(screenMusicGain);o.start(t);o.stop(t+.36);
+   g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.035,t+.025);g.gain.exponentialRampToValueAtTime(.0001,t+.34);o.connect(g);g.connect(screenMusicGain);o.start(t);o.stop(t+.36);
    if(screenMusicStep%23===0){const chord=chordSets[Math.floor(screenMusicStep/23)%chordSets.length];screenPadOsc.forEach((p,i)=>p.o.frequency.setTargetAtTime(chord[i],t,.35))}
    // Quiet/louder sections ebb gently instead of jumping in volume.
    const section=Math.floor((screenMusicStep*175/1000)/4)%6;
-   const levels=[.30,.52,.38,.62,.34,.48];screenMusicGain.gain.setTargetAtTime(levels[section],t,.8);
+   const levels=[.46,.64,.50,.76,.44,.60];screenMusicGain.gain.setTargetAtTime(levels[section],t,.8);
    screenMusicStep++;
   };
   playStep();screenMusicTimer=setInterval(playStep,175);
@@ -200,6 +200,6 @@ dpad.addEventListener('pointerup',releasePad);dpad.addEventListener('pointercanc
 const keyDirections=new Set(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d']);addEventListener('keydown',e=>{let m={ArrowUp:'up',w:'up',ArrowDown:'down',s:'down',ArrowLeft:'left',a:'left',ArrowRight:'right',d:'right'};if(m[e.key]){e.preventDefault();direction(m[e.key])}if(e.key===' '){e.preventDefault();pause()}});addEventListener('keyup',e=>{if(keyDirections.has(e.key))clearPadHighlight()});
 let sx=0,sy=0;canvas.addEventListener('pointerdown',e=>{sx=e.clientX;sy=e.clientY});canvas.addEventListener('pointerup',e=>{let dx=e.clientX-sx,dy=e.clientY-sy;if(Math.max(Math.abs(dx),Math.abs(dy))>18)direction(Math.abs(dx)>Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up'))});
 addEventListener('visibilitychange',()=>{if(document.hidden&&running)pause()});
-fresh();draw();$('overlay').classList.add('home-screen');startScreenMusic();fetchOnlineRanks().catch(()=>{});if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+fresh();draw();$('overlay').classList.add('home-screen');startScreenMusic();document.addEventListener('pointerdown',()=>{try{if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();if(!running&&($('headline').textContent==='PAPARONIPAC'||$('headline').textContent==='GAME OVER')&&!screenMusicTimer)startScreenMusic()}catch(e){}},{capture:true});fetchOnlineRanks().catch(()=>{});if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 })();
 </script></body></html>

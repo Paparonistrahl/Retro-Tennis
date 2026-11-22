@@ -126,30 +126,32 @@ function startMusic(){
 function stopMusic(){if(musicTimer){clearInterval(musicTimer);musicTimer=0}}
 let screenMusicTimer=0,screenMusicStep=0,screenMusicGain=null,screenPadOsc=[];
 const screenNotes=[587,784,587,659,880,659,587,784,1046,880,784,523,587,784,523,659,880,659,587,784,1046,880,659,523];
+let screenMusicStarting=false;
 function startScreenMusic(){
- if(muted||screenMusicTimer)return;
- try{
-  audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();audioCtx.resume();
-  const now=audioCtx.currentTime;
-  screenMusicGain=audioCtx.createGain();screenMusicGain.gain.setValueAtTime(.55,now);screenMusicGain.connect(audioCtx.destination);
-  // Soft mid-range chord bed (no sub-bass), with a gentle 24-second dynamic cycle.
-  const chordSets=[[262,330,392],[294,349,440],[247,311,370],[262,330,392],[330,392,494],[294,349,440]];
-  screenPadOsc=[];
-  chordSets[0].forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.value=f;g.gain.value=.016; o.connect(g);g.connect(screenMusicGain);o.start();screenPadOsc.push({o,g})});
-  screenMusicStep=0;
-  const playStep=()=>{
-   if(muted||(!document.querySelector('.home-screen')&&!document.querySelector('.arcade-screen'))){stopScreenMusic();return}
-   const t=audioCtx.currentTime,n=screenNotes[screenMusicStep%screenNotes.length];
-   const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='triangle';o.frequency.setValueAtTime(n,t);
-   g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.035,t+.025);g.gain.exponentialRampToValueAtTime(.0001,t+.34);o.connect(g);g.connect(screenMusicGain);o.start(t);o.stop(t+.36);
-   if(screenMusicStep%23===0){const chord=chordSets[Math.floor(screenMusicStep/23)%chordSets.length];screenPadOsc.forEach((p,i)=>p.o.frequency.setTargetAtTime(chord[i],t,.35))}
-   // Quiet/louder sections ebb gently instead of jumping in volume.
-   const section=Math.floor((screenMusicStep*175/1000)/4)%6;
-   const levels=[.46,.64,.50,.76,.44,.60];screenMusicGain.gain.setTargetAtTime(levels[section],t,.8);
-   screenMusicStep++;
-  };
-  playStep();screenMusicTimer=setInterval(playStep,175);
- }catch(e){}
+ if(muted||screenMusicTimer||screenMusicStarting)return;
+ screenMusicStarting=true;
+ (async()=>{
+  try{
+   audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();
+   await audioCtx.resume();
+   if(audioCtx.state!=='running'){screenMusicStarting=false;return}
+   const now=audioCtx.currentTime;
+   screenMusicGain=audioCtx.createGain();screenMusicGain.gain.setValueAtTime(.55,now);screenMusicGain.connect(audioCtx.destination);
+   const chordSets=[[262,330,392],[294,349,440],[247,311,370],[262,330,392],[330,392,494],[294,349,440]];
+   screenPadOsc=[];
+   chordSets[0].forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.value=f;g.gain.value=.016;o.connect(g);g.connect(screenMusicGain);o.start();screenPadOsc.push({o,g})});
+   screenMusicStep=0;
+   const playStep=()=>{
+    if(muted||audioCtx.state!=='running'||(!document.querySelector('.home-screen')&&!document.querySelector('.arcade-screen'))){stopScreenMusic();return}
+    const t=audioCtx.currentTime,n=screenNotes[screenMusicStep%screenNotes.length];
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='triangle';o.frequency.setValueAtTime(n,t);
+    g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.035,t+.025);g.gain.exponentialRampToValueAtTime(.0001,t+.34);o.connect(g);g.connect(screenMusicGain);o.start(t);o.stop(t+.36);
+    if(screenMusicStep%23===0){const chord=chordSets[Math.floor(screenMusicStep/23)%chordSets.length];screenPadOsc.forEach((p,i)=>p.o.frequency.setTargetAtTime(chord[i],t,.35))}
+    const section=Math.floor((screenMusicStep*175/1000)/4)%6,levels=[.46,.64,.50,.76,.44,.60];screenMusicGain.gain.setTargetAtTime(levels[section],t,.8);screenMusicStep++;
+   };
+   playStep();screenMusicTimer=setInterval(playStep,175);
+  }catch(e){}finally{screenMusicStarting=false}
+ })();
 }
 function stopScreenMusic(){
  if(screenMusicTimer){clearInterval(screenMusicTimer);screenMusicTimer=0}

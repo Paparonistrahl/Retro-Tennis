@@ -125,7 +125,7 @@ function startMusic(){
 }
 function stopMusic(){if(musicTimer){clearInterval(musicTimer);musicTimer=0}}
 let screenMusicTimer=0,screenMusicStep=0,screenMusicGain=null,screenPadOsc=[];
-const screenNotes=[523,523,523,587,622,622,698,698,698,587,587,523,523,466,466,523,523,622,622,784,784,698,698,622];
+const screenNotes=[587,784,587,659,880,659,587,784,1046,880,784,523,587,784,523,659,880,659,587,784,1046,880,659,523];
 function startScreenMusic(){
  if(muted||screenMusicTimer)return;
  try{

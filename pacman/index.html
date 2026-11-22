@@ -112,22 +112,33 @@ function waka(){wakaFlip^=1;tone(wakaFlip?520:390,.075,.035,'square',wakaFlip?26
 function powerSound(){tone(660,.12,.045,'square',880);tone(880,.12,.04,'square',1100,.12);tone(1100,.16,.04,'square',1320,.24)}
 function eatGhostSound(){[440,660,880,1180].forEach((f,i)=>tone(f,.11,.05,'square',f*1.35,i*.075))}
 function deathSound(){[520,440,360,280,200,130].forEach((f,i)=>tone(f,.16,.05,'sawtooth',Math.max(60,f*.72),i*.12))}
-// Original PaparoniPac soundtrack: use the uploaded WAV, not synthesized background music.
+// Original PaparoniPac soundtrack: route the WAV through Web Audio so its volume
+// is controllable on iOS Safari (HTMLMediaElement.volume is ignored there).
 const gameMusic=new Audio('assets/PaparoniPac_Soundteppich_24s_Stil.wav');
-gameMusic.loop=true;gameMusic.preload='auto';gameMusic.volume=.0001666667;
-let musicDuckTimer=0;
+gameMusic.loop=true;gameMusic.preload='auto';gameMusic.volume=1;
+let gameMusicSource=null,gameMusicGain=null,musicDuckTimer=0;
+const MUSIC_GAIN=.2; // five times quieter than full-scale audio
+function ensureMusicGain(){
+ if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+ if(!gameMusicSource){
+  gameMusicSource=audioCtx.createMediaElementSource(gameMusic);
+  gameMusicGain=audioCtx.createGain();
+  gameMusicGain.gain.value=MUSIC_GAIN;
+  gameMusicSource.connect(gameMusicGain);
+  gameMusicGain.connect(audioCtx.destination);
+ }
+ if(audioCtx.state==='suspended')audioCtx.resume();
+}
 function duckMusic(ms=420){
- if(muted)return;
- // Keep the soundtrack well below the effects while a game sound is playing.
- gameMusic.volume=.0000166667;
+ if(muted||!gameMusicGain)return;
+ gameMusicGain.gain.setTargetAtTime(MUSIC_GAIN*.1,audioCtx.currentTime,.015);
  if(musicDuckTimer)clearTimeout(musicDuckTimer);
- musicDuckTimer=setTimeout(()=>{musicDuckTimer=0;if(!muted&&running)gameMusic.volume=.0001666667},Math.max(260,ms));
+ musicDuckTimer=setTimeout(()=>{musicDuckTimer=0;if(!muted&&running&&gameMusicGain)gameMusicGain.gain.setTargetAtTime(MUSIC_GAIN,audioCtx.currentTime,.06)},Math.max(260,ms));
 }
 function startMusic(){
  if(muted||!running)return;
- gameMusic.muted=muted;
- const p=gameMusic.play();
- if(p&&typeof p.catch==='function')p.catch(e=>console.warn('Game soundtrack could not start:',e));
+ try{ensureMusicGain();gameMusic.muted=false;const p=gameMusic.play();if(p&&typeof p.catch==='function')p.catch(e=>console.warn('Game soundtrack could not start:',e))}
+ catch(e){console.warn('Game soundtrack audio setup failed:',e)}
 }
 function stopMusic(){gameMusic.pause()}
 function startScreenMusic(){/* Keep the title screen quiet; gameplay uses the original WAV. */}

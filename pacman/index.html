@@ -101,7 +101,9 @@ function tone(freq,dur=.09,volume=.045,type='square',endFreq=freq,delay=0){
  try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();audioCtx.resume();
  let t=audioCtx.currentTime+delay,o=audioCtx.createOscillator(),g=audioCtx.createGain();
  o.type=type;o.frequency.setValueAtTime(freq,t);o.frequency.exponentialRampToValueAtTime(Math.max(30,endFreq),t+dur);
- g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(volume,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+ // Boost the original synthesized SFX so they remain clearly audible over the WAV.
+ const effectVolume=Math.min(.32,volume*3.2);
+ g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(effectVolume,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
  o.connect(g);g.connect(audioCtx.destination);o.start(t);o.stop(t+dur+.015)
  }catch(e){}
 }
@@ -112,13 +114,14 @@ function eatGhostSound(){[440,660,880,1180].forEach((f,i)=>tone(f,.11,.05,'squar
 function deathSound(){[520,440,360,280,200,130].forEach((f,i)=>tone(f,.16,.05,'sawtooth',Math.max(60,f*.72),i*.12))}
 // Original PaparoniPac soundtrack: use the uploaded WAV, not synthesized background music.
 const gameMusic=new Audio('assets/PaparoniPac_Soundteppich_24s_Stil.wav');
-gameMusic.loop=true;gameMusic.preload='auto';gameMusic.volume=.32;
+gameMusic.loop=true;gameMusic.preload='auto';gameMusic.volume=.24;
 let musicDuckTimer=0;
-function duckMusic(ms=320){
+function duckMusic(ms=420){
  if(muted)return;
- gameMusic.volume=.13;
+ // Keep the soundtrack well below the effects while a game sound is playing.
+ gameMusic.volume=.025;
  if(musicDuckTimer)clearTimeout(musicDuckTimer);
- musicDuckTimer=setTimeout(()=>{musicDuckTimer=0;if(!muted&&running)gameMusic.volume=.32},Math.max(180,ms));
+ musicDuckTimer=setTimeout(()=>{musicDuckTimer=0;if(!muted&&running)gameMusic.volume=.24},Math.max(260,ms));
 }
 function startMusic(){
  if(muted||!running)return;

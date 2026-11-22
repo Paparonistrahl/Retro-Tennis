@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
       const issued = Date.now();
       const payload = b64url(new TextEncoder().encode(JSON.stringify({ nonce, issued })));
       const token = payload + "." + await hmac(payload, signingSecret);
-      const { error } = await db.from("paparonipac_score_sessions").insert({ nonce, started_at: new Date(issued).toISOString() });
+      const { error } = await db.from("paparoni_pac_score_sessions").insert({ nonce, started_at: new Date(issued).toISOString() });
       if (error) throw error;
       return json({ token });
     }
@@ -65,12 +65,12 @@ Deno.serve(async (req) => {
       return json({ error: "Score or name failed validation" }, 400);
     }
 
-    const { data: sessionRow, error: readError } = await db.from("paparonipac_score_sessions").select("nonce,submitted_at").eq("nonce", session.nonce).maybeSingle();
+    const { data: sessionRow, error: readError } = await db.from("paparoni_pac_score_sessions").select("nonce,submitted_at").eq("nonce", session.nonce).maybeSingle();
     if (readError || !sessionRow || sessionRow.submitted_at) return json({ error: "Session already used or unknown" }, 409);
-    const { data: claimed, error: useError } = await db.from("paparonipac_score_sessions").update({ submitted_at: new Date().toISOString() }).eq("nonce", session.nonce).is("submitted_at", null).select("nonce").maybeSingle();
+    const { data: claimed, error: useError } = await db.from("paparoni_pac_score_sessions").update({ submitted_at: new Date().toISOString() }).eq("nonce", session.nonce).is("submitted_at", null).select("nonce").maybeSingle();
     if (useError) throw useError;
     if (!claimed) return json({ error: "Session already submitted" }, 409);
-    const { error: insertError } = await db.from("paparonipac_scores").insert({ player_name: name, score });
+    const { error: insertError } = await db.from("paparoni_pac_scores").insert({ player_name: name, score });
     if (insertError) throw insertError;
     return json({ ok: true });
   } catch (e) {

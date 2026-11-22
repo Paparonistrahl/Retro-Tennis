@@ -127,18 +127,26 @@ function ensureMusicGain(){
   gameMusicSource.connect(gameMusicGain);
   gameMusicGain.connect(audioCtx.destination);
  }
- if(audioCtx.state==='suspended')audioCtx.resume();
 }
 function duckMusic(ms=420){
  // Keep WAV soundtrack at the same level during and between game sound effects.
 }
-function startMusic(){
- if(muted||!running)return;
- try{ensureMusicGain();gameMusic.muted=false;const p=gameMusic.play();if(p&&typeof p.catch==='function')p.catch(e=>console.warn('Game soundtrack could not start:',e))}
- catch(e){console.warn('Game soundtrack audio setup failed:',e)}
+function playWavMusic(){
+ if(muted)return;
+ try{
+  ensureMusicGain();
+  gameMusic.muted=false;
+  // Call play() directly in the user gesture, then resume the Web Audio
+  // context as well; Safari can otherwise leave the connected WAV silent.
+  const playPromise=gameMusic.play();
+  const resumePromise=audioCtx.state==='suspended'?audioCtx.resume():Promise.resolve();
+  Promise.all([Promise.resolve(playPromise),Promise.resolve(resumePromise)])
+   .catch(e=>console.warn('PaparoniPac WAV could not start:',e));
+ }catch(e){console.warn('PaparoniPac WAV audio setup failed:',e)}
 }
+function startMusic(){if(!muted&&running)playWavMusic()}
 function stopMusic(){gameMusic.pause()}
-function startScreenMusic(){if(muted)return;try{ensureMusicGain();gameMusic.muted=false;const p=gameMusic.play();if(p&&typeof p.catch==='function')p.catch(e=>console.warn('Screen soundtrack could not start:',e))}catch(e){console.warn('Screen soundtrack audio setup failed:',e)}}
+function startScreenMusic(){if(!muted)playWavMusic()}
 function stopScreenMusic(){stopMusic()}
 function clearPadHighlight(){if(activeTouches.size===0)dpad.querySelectorAll('button').forEach(b=>b.classList.remove('selected'))}function direction(d){if(!dirs[d])return;pac.want=d;$('dpad').querySelectorAll('button').forEach(b=>b.classList.toggle('selected',b.dataset.dir===d))}
 function movePac(){let from={x:pac.x,y:pac.y},wallPass=Date.now()<wallPowerUntil;const pacTile=(x,y,d)=>{let p=nextTile(x,y,d);if(wallPass){p.x=(p.x+C)%C;p.y=(p.y+R)%R}return p};let want=pacTile(pac.x,pac.y,pac.want);if(!wall(want.x,want.y,true))pac.dir=pac.want;let next=pacTile(pac.x,pac.y,pac.dir);if(!wall(next.x,next.y,true)){pac.x=next.x;pac.y=next.y;pac.step++}if(portalPair.some(([x,y])=>x===pac.x&&y===pac.y)&&portalPair.length===2){let dest=portalPair.find(([x,y])=>x!==pac.x||y!==pac.y);if(dest){pac.x=dest[0];pac.y=dest[1];tone(740,.12,.035,'sine',1120)}}let v=map[pac.y][pac.x];if(v==='a'||v==='b'||v==='s'){map[pac.y][pac.x]=' ';let i=v==='a'?0:v==='b'?1:2;powerInventory[i]++;if(selectedPower<0||powerInventory[selectedPower]===0)selectedPower=i;chirp(880,.1);activity(['WAND-PHASE AUFGESAMMELT!','SCHOCKWELLE AUFGESAMMELT!','SPEEDBOOST AUFGESAMMELT!'][i]);renderPowerups();updateUI()}if(v==='.'||v==='o'||v==='c'){map[pac.y][pac.x]=' ';awardScore(v==='o'?50:v==='c'?200:10);if(v==='c')activity('+200 PEPERONI!');else if(v==='o')activity('+50 POWER-PILLE!');else activity('+10 PUNKTE');if(v==='o'){power=Date.now()+Math.max(6200,10000-(level-1)*180);ghostChain=0;powerSound()}else if(v==='c'){tone(980,.16,.05,'square',1450);tone(1250,.2,.04,'square',1650,.12);scheduleCherry()}else waka();if(v!== 'c')remaining--;if(score>high){high=score;localStorage.setItem('paparoni-pac-high',high)}updateUI();if(!remaining){running=false;stopMusic();nextLevel=true;lives++;updateUI();show('LEVEL '+level+' GESCHAFFT!','Level geschafft! +1 EXTRA-LEBEN 🎁<br>Bereit für das nächste Labyrinth?','▶ LEVEL '+(level+1))}}return from}
@@ -185,6 +193,6 @@ dpad.addEventListener('pointerup',releasePad);dpad.addEventListener('pointercanc
 const keyDirections=new Set(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d']);addEventListener('keydown',e=>{let m={ArrowUp:'up',w:'up',ArrowDown:'down',s:'down',ArrowLeft:'left',a:'left',ArrowRight:'right',d:'right'};if(m[e.key]){e.preventDefault();direction(m[e.key])}if(e.key===' '){e.preventDefault();pause()}});addEventListener('keyup',e=>{if(keyDirections.has(e.key))clearPadHighlight()});
 let sx=0,sy=0;canvas.addEventListener('pointerdown',e=>{sx=e.clientX;sy=e.clientY});canvas.addEventListener('pointerup',e=>{let dx=e.clientX-sx,dy=e.clientY-sy;if(Math.max(Math.abs(dx),Math.abs(dy))>18)direction(Math.abs(dx)>Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up'))});
 addEventListener('visibilitychange',()=>{if(document.hidden&&running)pause()});
-fresh();draw();$('overlay').classList.add('home-screen');startScreenMusic();document.addEventListener('pointerdown',()=>{try{if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();if(!running&&($('headline').textContent==='PAPARONIPAC'||$('headline').textContent==='GAME OVER')&&!screenMusicTimer)startScreenMusic()}catch(e){}},{capture:true});fetchOnlineRanks().catch(()=>{});if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+fresh();draw();$('overlay').classList.add('home-screen');startScreenMusic();document.addEventListener('pointerdown',()=>{try{if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();if(!running&&gameMusic.paused&&($('headline').textContent==='PAPARONIPAC'||$('headline').textContent==='GAME OVER'))startScreenMusic()}catch(e){}},{capture:true});fetchOnlineRanks().catch(()=>{});if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 })();
 </script></body></html>

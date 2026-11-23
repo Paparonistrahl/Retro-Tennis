@@ -58,7 +58,14 @@
 .rank-entry{touch-action:auto;pointer-events:auto}
 .rank-entry input{display:block;touch-action:manipulation;pointer-events:auto;-webkit-appearance:textfield;appearance:textfield;flex:1 1 100%;width:100%;min-height:48px;font-size:16px}
 
-\n</style></head><body><div class="launch-screen" id="launchScreen" role="button" tabindex="0" aria-label="PaparoniPac starten"><div class="launch-emblem"><div class="launch-kicker">PAPARONI ARCADE PRESENTS</div><img class="launch-mark" src="icons/paparoni-character.png?v=17" alt="Paparoni Pixelpepperoni Entwickler-Maskottchen"><div class="launch-title">PAPARONI<span>PAC</span></div><div class="launch-subtitle">RETRO ARCADE · ORIGINAL GAME</div></div><button class="launch-enter" id="launchEnter" type="button">▶ TAP TO ENTER</button><button class="launch-refresh" id="launchRefresh" type="button">↻ UPDATE / REFRESH</button><div class="launch-update-status" id="launchUpdateStatus" aria-live="polite">UPDATE-CHECK …</div><div class="launch-version">PAPARONIPAC · v1.0.48</div><div class="launch-subtitle">SOUND ON · READY PLAYER ONE</div></div><main class="app">
+\n/* Gamepad menu focus: blue selection, no yellow menu highlight. */
+.overlay .btn{border:2px solid #5279ff;background:linear-gradient(145deg,#263d9b,#111d54);color:#fff;box-shadow:0 0 12px #244dff44}
+.overlay .btn.secondary{border-color:#5279ff;background:linear-gradient(145deg,#263d9b,#111d54);color:#fff}
+.overlay .btn.controller-selected{border-color:#8db5ff;background:linear-gradient(145deg,#3c65e8,#18338f);color:#fff;box-shadow:0 0 0 3px #397aff55,0 0 22px #397affcc}
+.launch-enter{border-color:#5279ff;background:linear-gradient(145deg,#263d9b,#111d54);color:#fff;box-shadow:0 0 16px #244dff55;animation:none}
+.launch-enter.controller-selected,.launch-refresh.controller-selected{border-color:#8db5ff;background:linear-gradient(145deg,#3c65e8,#18338f);color:#fff;box-shadow:0 0 0 3px #397aff55,0 0 22px #397affcc}
+.launch-refresh{border-color:#5279ff;background:#111d54;color:#dce5ff}
+</style></head><body><div class="launch-screen" id="launchScreen" role="button" tabindex="0" aria-label="PaparoniPac starten"><div class="launch-emblem"><div class="launch-kicker">PAPARONI ARCADE PRESENTS</div><img class="launch-mark" src="icons/paparoni-character.png?v=17" alt="Paparoni Pixelpepperoni Entwickler-Maskottchen"><div class="launch-title">PAPARONI<span>PAC</span></div><div class="launch-subtitle">RETRO ARCADE · ORIGINAL GAME</div></div><button class="launch-enter" id="launchEnter" type="button">▶ TAP TO ENTER</button><button class="launch-refresh" id="launchRefresh" type="button">↻ UPDATE / REFRESH</button><div class="launch-update-status" id="launchUpdateStatus" aria-live="polite">UPDATE-CHECK …</div><div class="launch-version">PAPARONIPAC · v1.0.49</div><div class="launch-subtitle">SOUND ON · READY PLAYER ONE</div></div><main class="app">
 <div class="top"><span class="brand">◈ PAPARONI ARCADE</span><span>PAPARONIPAC <span class="version-tag">v1.0.48</span></span></div>
 <section class="scores"><div class="score"><small>PUNKTE</small><b id="score">0</b></div><div class="score"><small>HIGH SCORE</small><b id="high">0</b></div><div class="score"><small>LEBEN</small><b id="lives">3</b></div><div class="score"><small>LEVEL</small><b id="level">1</b></div></section>
 <div class="board-wrap"><canvas class="board" id="game" width="420" height="460" aria-label="PaparoniPac Spielfeld"></canvas><div class="overlay" id="overlay"><h1 id="headline">PAPARONIPAC</h1><div class="hero-stage" aria-label="Paparoni leuchtet und dreht sich im Arcade-Stil"><div class="hero-ring"></div><img class="hero-art" id="heroArtwork" src="icons/paparoni-character.png?v=17" alt="Paparoni, pixelige Peperoni mit Sonnenbrille und großem Schnurrbart"></div><div class="power-demo" aria-label="Power-up Vorschau"><div class="demo-power wall-demo"><span class="demo-icon">🧱</span><span class="demo-caption">WAND-PHASE</span><span class="demo-action">durch Wände</span></div><div class="demo-power shock-demo"><span class="shock-ring"></span><span class="demo-icon">💥</span><span class="demo-caption">SCHOCKWELLE</span><span class="demo-action">Käfer treffen</span></div><div class="demo-power speed-demo"><span class="demo-icon">🏎️</span><span class="demo-caption">SPEEDBOOST</span><span class="demo-action">Turbo!</span></div></div><p id="intro">Sammle alle Punkte und hüte dich vor den Japankäfern!<br>Power-Pillen machen die Käfer kurz verwundbar.</p><div class="rank-panel" id="rankPanel"><div id="rankPrompt"></div><div class="rank-entry" id="rankEntry"><input id="playerName" type="text" inputmode="text" enterkeyhint="done" maxlength="10" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="NAME (max. 10)"><button id="saveRank" disabled>SPEICHERN</button></div><ol id="rankList"></ol></div><button class="btn" id="start">▶ START</button><button class="btn secondary" id="highscoreBtn">🏆 HIGHSCORE</button><button class="launch-control" id="gamepadControl" type="button">🎮 DUALSHOCK: VERBINDEN</button><div class="launch-control-status" id="gamepadStatus" aria-live="polite">BLUETOOTH-KONTROLLER KOPPELN · STEUERKREUZ / LINKER STICK</div></div></div>
@@ -214,27 +221,63 @@ function startScreenMusic(){if(!muted)playWavMusic()}
 function stopScreenMusic(){stopMusic()}
 function clearPadHighlight(){if(activeTouches.size===0)dpad.querySelectorAll('button').forEach(b=>b.classList.remove('selected'))}function direction(d){if(!dirs[d])return;pac.want=d;$('dpad').querySelectorAll('button').forEach(b=>b.classList.toggle('selected',b.dataset.dir===d))}
 let gamepadLastDirection='',gamepadLastAt=0,gamepadButtonState=[];
+let gamepadMenuIndex=0,gamepadMenuScreen='',gamepadMenuLastAt=0;
+function visibleMenuTargets(){
+ const launch=$('launchScreen');
+ if(launch&&launch.isConnected&&launch.style.pointerEvents!=='none'){
+  return [...launch.querySelectorAll('#launchEnter,#launchRefresh')].filter(el=>el.getClientRects().length&&!el.disabled);
+ }
+ const overlay=$('overlay');
+ if(!running&&overlay&&overlay.style.display!=='none'){
+  return [...overlay.querySelectorAll('button')].filter(el=>el.getClientRects().length&&!el.disabled&&el.id!=='saveRank');
+ }
+ return [];
+}
+function updateMenuSelection(targets){
+ targets.forEach((el,i)=>el.classList.toggle('controller-selected',i===gamepadMenuIndex));
+}
+function moveGamepadMenu(dir,targets){
+ if(!targets.length)return;
+ const now=Date.now();
+ if(dir!==gamepadLastDirection||now-gamepadMenuLastAt>220){
+  const vertical=dir==='up'||dir==='down';
+  gamepadMenuIndex=(gamepadMenuIndex+(dir==='up'||dir==='left'?-1:1)+targets.length)%targets.length;
+  gamepadMenuLastAt=now;
+ }
+ gamepadLastDirection=dir;
+ updateMenuSelection(targets);
+}
 function pollGamepad(){
  const pad=connectedGamepad();
  if(!pad){gamepadLastDirection='';gamepadButtonState=[];return}
  const buttons=pad.buttons||[],axes=pad.axes||[];
  const pressed=i=>!!buttons[i]?.pressed,edge=i=>pressed(i)&&!gamepadButtonState[i];
- // Gamepad input is intentionally gameplay-only. Menus and Tap to Enter
- // never consume controller buttons or directions.
- if(running&&edge(0))pause();
- if(running){if(edge(6))activatePower(1);if(edge(7))activatePower(2);if(edge(5))activatePower(0)}
- gamepadButtonState=buttons.map(b=>!!b?.pressed);
  let dir=null;
  if(pressed(12))dir='up';else if(pressed(13))dir='down';else if(pressed(14))dir='left';else if(pressed(15))dir='right';
  if(!dir){
   const x=Number(axes[0])||0,y=Number(axes[1])||0;
   if(Math.max(Math.abs(x),Math.abs(y))>=.55)dir=Math.abs(x)>Math.abs(y)?(x>0?'right':'left'):(y>0?'down':'up');
  }
- if(!dir){gamepadLastDirection='';return}
- const now=Date.now();
- if(running&&(dir!==gamepadLastDirection||now-gamepadLastAt>170)){
-  direction(dir);gamepadLastDirection=dir;gamepadLastAt=now;
+ if(!running){
+  const targets=visibleMenuTargets();
+  const screen=targets[0]?.closest('#launchScreen')?'launch':'menu';
+  if(screen!==gamepadMenuScreen){gamepadMenuScreen=screen;gamepadMenuIndex=0;gamepadLastDirection='';}
+  if(targets.length){
+   gamepadMenuIndex=Math.min(gamepadMenuIndex,targets.length-1);
+   updateMenuSelection(targets);
+   if(dir)moveGamepadMenu(dir,targets);else gamepadLastDirection='';
+   // PlayStation Square is standard Gamepad API button 2.
+   if(edge(2)){targets[gamepadMenuIndex]?.click();gamepadLastDirection='';}
+  }else{gamepadLastDirection='';}
+ }else{
+  // Preserve the existing in-game pause and power-up button mapping.
+  if(edge(0))pause();
+  if(running){if(edge(6))activatePower(1);if(edge(7))activatePower(2);if(edge(5))activatePower(0)}
+  if(dir&&(dir!==gamepadLastDirection||Date.now()-gamepadLastAt>170)){
+   direction(dir);gamepadLastDirection=dir;gamepadLastAt=Date.now();
+  }else if(!dir)gamepadLastDirection='';
  }
+ gamepadButtonState=buttons.map(b=>!!b?.pressed);
 }
 function gamepadPollFrame(){pollGamepad();requestAnimationFrame(gamepadPollFrame)}requestAnimationFrame(gamepadPollFrame);
 
@@ -282,7 +325,7 @@ dpad.addEventListener('pointerup',releasePad);dpad.addEventListener('pointercanc
 const keyDirections=new Set(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d']);addEventListener('keydown',e=>{let m={ArrowUp:'up',w:'up',ArrowDown:'down',s:'down',ArrowLeft:'left',a:'left',ArrowRight:'right',d:'right'};if(m[e.key]){e.preventDefault();direction(m[e.key])}if(e.key===' '){e.preventDefault();pause()}});addEventListener('keyup',e=>{if(keyDirections.has(e.key))clearPadHighlight()});
 let sx=0,sy=0;canvas.addEventListener('pointerdown',e=>{sx=e.clientX;sy=e.clientY});canvas.addEventListener('pointerup',e=>{let dx=e.clientX-sx,dy=e.clientY-sy;if(Math.max(Math.abs(dx),Math.abs(dy))>18)direction(Math.abs(dx)>Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up'))});
 addEventListener('visibilitychange',()=>{if(document.hidden&&running)pause()});
-const launchScreen=$('launchScreen');const launchUpdateStatus=$('launchUpdateStatus');const gamepadControl=$('gamepadControl'),gamepadStatus=$('gamepadStatus');function connectedGamepad(){if(!navigator.getGamepads)return null;const pads=navigator.getGamepads();for(let i=0;i<pads.length;i++)if(pads[i]&&pads[i].connected)return pads[i];return null}function updateGamepadUI(){const pad=connectedGamepad();gamepadControl.textContent=pad?'🎮 DUALSHOCK: VERBUNDEN':'🎮 DUALSHOCK: VERBINDEN';gamepadStatus.textContent=pad?'KONTROLLER ERKANNT · STEUERKREUZ / LINKER STICK':'HANDY-BLUETOOTH ÖFFNEN UND DUALSHOCK KOPPELN'}gamepadControl.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();updateGamepadUI();if(!connectedGamepad())gamepadStatus.textContent='PS-TASTE AM CONTROLLER HALTEN · IN BLUETOOTH „DUALSHOCK“ WÄHLEN';});addEventListener('gamepadconnected',updateGamepadUI);addEventListener('gamepaddisconnected',updateGamepadUI);updateGamepadUI();let refreshInProgress=false;async function refreshGame(manual=false){if(refreshInProgress)return;refreshInProgress=true;if(launchUpdateStatus)launchUpdateStatus.textContent='CHECKING FOR UPDATE …';try{if('serviceWorker'in navigator){const reg=await navigator.serviceWorker.register('sw.js?v=94',{updateViaCache:'none'});await reg.update();if(reg.waiting){reg.waiting.postMessage({type:'SKIP_WAITING'});if(launchUpdateStatus)launchUpdateStatus.textContent='UPDATE READY · RELOADING';setTimeout(()=>location.reload(),350);return}if(launchUpdateStatus)launchUpdateStatus.textContent='GAME IS UP TO DATE';}else{if(launchUpdateStatus)launchUpdateStatus.textContent='REFRESHING GAME …';location.reload();return}if(manual){if(launchUpdateStatus)launchUpdateStatus.textContent='REFRESHING …';setTimeout(()=>location.reload(),250)}}catch(err){console.warn('PaparoniPac update check failed:',err);if(launchUpdateStatus)launchUpdateStatus.textContent='OFFLINE · USING SAVED GAME';if(manual)setTimeout(()=>location.reload(),250)}finally{refreshInProgress=false}}$('launchRefresh').addEventListener('click',e=>{e.preventDefault();e.stopPropagation();refreshGame(true)});if('serviceWorker'in navigator){navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!sessionStorage.getItem('paparonipac-updated-reload')){sessionStorage.setItem('paparonipac-updated-reload','1');location.reload()}});sessionStorage.removeItem('paparonipac-updated-reload');refreshGame(false)}function enterArcade(e){if(e){e.preventDefault();e.stopPropagation()}gamepadMenuIndex=0;try{if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume().catch(()=>{});startScreenMusic()}catch(err){console.warn('Audio unlock deferred:',err)}launchScreen.style.transition='opacity .35s ease';launchScreen.style.opacity='0';launchScreen.style.pointerEvents='none';setTimeout(()=>launchScreen.remove(),360)}$('launchEnter').addEventListener('click',enterArcade);launchScreen.addEventListener('click',enterArcade);launchScreen.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){enterArcade(e)}});
+const launchScreen=$('launchScreen');const launchUpdateStatus=$('launchUpdateStatus');const gamepadControl=$('gamepadControl'),gamepadStatus=$('gamepadStatus');function connectedGamepad(){if(!navigator.getGamepads)return null;const pads=navigator.getGamepads();for(let i=0;i<pads.length;i++)if(pads[i]&&pads[i].connected)return pads[i];return null}function updateGamepadUI(){const pad=connectedGamepad();gamepadControl.textContent=pad?'🎮 DUALSHOCK: VERBUNDEN':'🎮 DUALSHOCK: VERBINDEN';gamepadStatus.textContent=pad?'KONTROLLER ERKANNT · STEUERKREUZ / LINKER STICK':'HANDY-BLUETOOTH ÖFFNEN UND DUALSHOCK KOPPELN'}gamepadControl.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();updateGamepadUI();if(!connectedGamepad())gamepadStatus.textContent='PS-TASTE AM CONTROLLER HALTEN · IN BLUETOOTH „DUALSHOCK“ WÄHLEN';});addEventListener('gamepadconnected',updateGamepadUI);addEventListener('gamepaddisconnected',updateGamepadUI);updateGamepadUI();let refreshInProgress=false;async function refreshGame(manual=false){if(refreshInProgress)return;refreshInProgress=true;if(launchUpdateStatus)launchUpdateStatus.textContent='CHECKING FOR UPDATE …';try{if('serviceWorker'in navigator){const reg=await navigator.serviceWorker.register('sw.js?v=95',{updateViaCache:'none'});await reg.update();if(reg.waiting){reg.waiting.postMessage({type:'SKIP_WAITING'});if(launchUpdateStatus)launchUpdateStatus.textContent='UPDATE READY · RELOADING';setTimeout(()=>location.reload(),350);return}if(launchUpdateStatus)launchUpdateStatus.textContent='GAME IS UP TO DATE';}else{if(launchUpdateStatus)launchUpdateStatus.textContent='REFRESHING GAME …';location.reload();return}if(manual){if(launchUpdateStatus)launchUpdateStatus.textContent='REFRESHING …';setTimeout(()=>location.reload(),250)}}catch(err){console.warn('PaparoniPac update check failed:',err);if(launchUpdateStatus)launchUpdateStatus.textContent='OFFLINE · USING SAVED GAME';if(manual)setTimeout(()=>location.reload(),250)}finally{refreshInProgress=false}}$('launchRefresh').addEventListener('click',e=>{e.preventDefault();e.stopPropagation();refreshGame(true)});if('serviceWorker'in navigator){navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!sessionStorage.getItem('paparonipac-updated-reload')){sessionStorage.setItem('paparonipac-updated-reload','1');location.reload()}});sessionStorage.removeItem('paparonipac-updated-reload');refreshGame(false)}function enterArcade(e){if(e){e.preventDefault();e.stopPropagation()}gamepadMenuIndex=0;gamepadMenuScreen='';try{if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume().catch(()=>{});startScreenMusic()}catch(err){console.warn('Audio unlock deferred:',err)}launchScreen.style.transition='opacity .35s ease';launchScreen.style.opacity='0';launchScreen.style.pointerEvents='none';setTimeout(()=>launchScreen.remove(),360)}$('launchEnter').addEventListener('click',enterArcade);launchScreen.addEventListener('click',enterArcade);launchScreen.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){enterArcade(e)}});
 fresh();draw();$('overlay').classList.add('home-screen');startScreenMusic();document.addEventListener('pointerdown',()=>{try{if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();if(!running&&gameMusic.paused&&($('headline').textContent==='PAPARONIPAC'||$('headline').textContent==='GAME OVER'))startScreenMusic()}catch(e){}},{capture:true});fetchOnlineRanks().catch(()=>{});
 })();
 </script></body></html>

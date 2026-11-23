@@ -214,45 +214,14 @@ function startScreenMusic(){if(!muted)playWavMusic()}
 function stopScreenMusic(){stopMusic()}
 function clearPadHighlight(){if(activeTouches.size===0)dpad.querySelectorAll('button').forEach(b=>b.classList.remove('selected'))}function direction(d){if(!dirs[d])return;pac.want=d;$('dpad').querySelectorAll('button').forEach(b=>b.classList.toggle('selected',b.dataset.dir===d))}
 let gamepadLastDirection='',gamepadLastAt=0,gamepadButtonState=[];
-let gamepadMenuIndex=0,gamepadMenuTargetKey='';
-function gamepadMenuTargets(){
- const root=$('launchScreen')||$('overlay');
- if(!root||getComputedStyle(root).display==='none')return [];
- const targets=Array.from(root.querySelectorAll('button:not(:disabled)')).filter(b=>{
-  const r=b.getBoundingClientRect(),s=getComputedStyle(b);
-  return r.width>0&&r.height>0&&s.display!=='none'&&s.visibility!=='hidden';
- });
- const key=targets.map(b=>b.id||b.textContent.trim()).join('|');
- if(key!==gamepadMenuTargetKey){gamepadMenuTargetKey=key;gamepadMenuIndex=0}
- return targets;
-}
-function gamepadMenuMove(dir){
- direction(dir);
- const targets=gamepadMenuTargets();if(!targets.length)return;
- gamepadMenuIndex=(gamepadMenuIndex+(dir==='up'||dir==='left'?-1:1)+targets.length)%targets.length;
-}
-function gamepadMenuSelect(){
- const targets=gamepadMenuTargets();if(!targets.length)return;
- gamepadMenuIndex=((gamepadMenuIndex%targets.length)+targets.length)%targets.length;
- const target=targets[gamepadMenuIndex];
- target.focus({preventScroll:true});
- target.click();
-}
 function pollGamepad(){
  const pad=connectedGamepad();
  if(!pad){gamepadLastDirection='';gamepadButtonState=[];return}
  const buttons=pad.buttons||[],axes=pad.axes||[];
  const pressed=i=>!!buttons[i]?.pressed,edge=i=>pressed(i)&&!gamepadButtonState[i];
- const launch=!!$('launchScreen');
- const menu=!launch&&!running&&getComputedStyle($('overlay')).display!=='none';
- if((edge(0)||edge(1)||edge(2)||edge(3))&&(launch||menu))gamepadMenuSelect();
- else if(edge(0)&&!launch&&!menu){
-  if(running)pause();
-  else if($('headline').textContent==='PAUSE'){
-   $('overlay').style.display='none';$('controls').style.display='grid';$('dpad').style.display='grid';
-   running=true;last=0;raf=requestAnimationFrame(loop);startMusic();
-  }else start();
- }
+ // Gamepad input is intentionally gameplay-only. Menus and Tap to Enter
+ // never consume controller buttons or directions.
+ if(running&&edge(0))pause();
  if(running){if(edge(6))activatePower(1);if(edge(7))activatePower(2);if(edge(5))activatePower(0)}
  gamepadButtonState=buttons.map(b=>!!b?.pressed);
  let dir=null;
@@ -262,11 +231,9 @@ function pollGamepad(){
   if(Math.max(Math.abs(x),Math.abs(y))>=.55)dir=Math.abs(x)>Math.abs(y)?(x>0?'right':'left'):(y>0?'down':'up');
  }
  if(!dir){gamepadLastDirection='';return}
- const now=Date.now(),menuNav=(launch||menu)&&!running;
- if(dir!==gamepadLastDirection||now-gamepadLastAt>(menuNav?210:170)){
-  if(menuNav)gamepadMenuMove(dir);
-  else if(running)direction(dir);
-  gamepadLastDirection=dir;gamepadLastAt=now;
+ const now=Date.now();
+ if(running&&(dir!==gamepadLastDirection||now-gamepadLastAt>170)){
+  direction(dir);gamepadLastDirection=dir;gamepadLastAt=now;
  }
 }
 function gamepadPollFrame(){pollGamepad();requestAnimationFrame(gamepadPollFrame)}requestAnimationFrame(gamepadPollFrame);

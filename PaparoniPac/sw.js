@@ -43,7 +43,7 @@ self.addEventListener('fetch',event=>{
       const full=await cache.match(fullUrl);
       if(full){
         const bytes=await full.arrayBuffer(),size=bytes.byteLength;
-        const match=request.headers.get('range').match(/^bytes=(\\d*)-(\\d*)$/);
+        const match=request.headers.get('range').match(/^bytes=(\d*)-(\d*)$/);
         if(!match)return new Response(null,{status:416,headers:{'Content-Range':'bytes */'+size}});
         let start=match[1]?Number(match[1]):Math.max(0,size-Number(match[2]));
         let end=match[2]&&match[1]?Math.min(Number(match[2]),size-1):match[1]?size-1:size-1;

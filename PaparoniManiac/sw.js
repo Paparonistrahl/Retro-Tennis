@@ -1,4 +1,4 @@
-const CACHE='paparonimaniac-v151';
+const CACHE='paparonimaniac-v152';
 const FILES=[
   './',
   './index.html',

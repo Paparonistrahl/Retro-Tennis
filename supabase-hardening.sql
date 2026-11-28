@@ -1,4 +1,4 @@
--- PaparoniPac: server-side submission gate
+-- PaparoniManiac: server-side submission gate
 -- Keep pacman_scores / pacman_score_sessions as compatibility names for the live Supabase schema.
 create table if not exists public.pacman_score_sessions (
   nonce text primary key,

@@ -61,7 +61,8 @@ Deno.serve(async (req) => {
 
     const name = String(body.name ?? "").trim().slice(0, 10).toUpperCase();
     const score = Number(body.score);
-    if (!/^[A-Z0-9_]{1,10}$/.test(name) || !Number.isSafeInteger(score) || score < 0 || score > Math.floor((elapsed / 1000) * 900 + 5000)) {
+    const maxScoreForSession = Math.floor((elapsed / 1000) * 16_000 + 25_000); // Allows high-scoring long runs while retaining a session-time ceiling.
+    if (!/^[A-Z0-9_]{1,10}$/.test(name) || !Number.isSafeInteger(score) || score < 0 || score > 2_000_000_000 || score > maxScoreForSession) {
       return json({ error: "Score or name failed validation" }, 400);
     }
 

@@ -330,7 +330,7 @@ function startMusic(){if(!muted&&running)playWavMusic()}
 function stopMusic(){musicWanted=false;if(musicRecoveryTimer){clearTimeout(musicRecoveryTimer);musicRecoveryTimer=0}gameMusic.pause()}
 function startScreenMusic(){if(!muted)playWavMusic()}
 function stopScreenMusic(){stopMusic()}
-function clearPadHighlight(){if(activeTouches.size===0)dpad.querySelectorAll('button').forEach(b=>b.classList.remove('selected'))}function direction(d){if(!dirs[d])return;if(Date.now()<speedPowerUntil){if(pendingDirection!==d&&pac.want!==d){pendingDirection=d;directionApplyAt=Date.now()+500}}else{pac.want=d;pendingDirection=''}$('dpad').querySelectorAll('button').forEach(b=>b.classList.toggle('selected',b.dataset.dir===d))}
+function clearPadHighlight(){if(activeTouches.size===0)dpad.querySelectorAll('button').forEach(b=>b.classList.remove('selected'))}function direction(d){if(!dirs[d])return;if(Date.now()<speedPowerUntil){if(d===pac.want){pendingDirection='';directionApplyAt=0}else if(pendingDirection!==d){pendingDirection=d;directionApplyAt=Date.now()+500}}else{pac.want=d;pendingDirection='';directionApplyAt=0}$('dpad').querySelectorAll('button').forEach(b=>b.classList.toggle('selected',b.dataset.dir===d))}
 let gamepadLastDirection='',gamepadLastAt=0,gamepadButtonState=[];
 let gamepadMenuIndex=0,gamepadMenuScreen='',gamepadMenuLastAt=0;
 function visibleMenuTargets(){

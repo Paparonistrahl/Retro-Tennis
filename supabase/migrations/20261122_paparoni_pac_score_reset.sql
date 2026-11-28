@@ -1,4 +1,4 @@
--- PaparoniPac score reset and clean schema (destructive by design).
+-- PaparoniManiac score reset and clean schema (destructive by design).
 -- Run in Supabase SQL Editor. This deletes all old and current leaderboard/session rows.
 
 drop table if exists public.pacman_score_sessions cascade;
@@ -21,7 +21,7 @@ create index paparoni_pac_scores_rank_idx
 alter table public.paparoni_pac_scores enable row level security;
 grant select on public.paparoni_pac_scores to anon, authenticated;
 grant all on public.paparoni_pac_scores to service_role;
-create policy "PaparoniPac scores are publicly readable"
+create policy "PaparoniManiac scores are publicly readable"
   on public.paparoni_pac_scores for select
   to anon, authenticated using (true);
 

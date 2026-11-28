@@ -1,4 +1,4 @@
 # Retro-Tennis
 
-- [PaparoniPac Arcade](./PaparoniPac/)
+- [PaparoniManiac Arcade](./PaparoniManiac/)
 - Retro Tennis (Hauptspiel)

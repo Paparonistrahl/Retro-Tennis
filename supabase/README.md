@@ -1,4 +1,4 @@
-# PaparoniPac leaderboard hardening
+# PaparoniManiac leaderboard hardening
 
 1. In the Supabase SQL Editor, run `supabase-hardening.sql`.
 2. Deploy the Edge Function folder `supabase/functions/paparoni-pac-score` as function name `paparoni-pac-score`.
@@ -8,7 +8,7 @@
    - `PAPARONIPAC_SIGNING_SECRET`: a new random secret of at least 32 bytes
 4. The browser uses only the existing publishable key.
 
-The existing score-table names `pacman_scores` and `pacman_score_sessions` are retained as database compatibility identifiers; renaming them requires a separate Supabase migration and updating the live `bright-service` function.
+The deployed Edge Function route `paparoni-pac-score`, signing-secret name `PAPARONIPAC_SIGNING_SECRET`, and score-table names are legacy backend compatibility identifiers. They are intentionally retained so the currently deployed online leaderboard keeps working; changing them requires coordinated deployment and a database migration.
 
 The function issues a signed one-use session token, enforces a minimum/maximum session duration, applies a generous score-per-time ceiling, and performs inserts with the server-only key. Direct browser inserts are revoked.
 
